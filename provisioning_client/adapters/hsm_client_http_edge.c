@@ -34,12 +34,20 @@ static const int HSM_HTTP_EDGE_MAXIMUM_REQUEST_TIME = 60; // 1 Minute
 
 #include "hsm_client_http_edge.h"
 
+typedef enum WORKLOAD_PROTOCOL_TYPE_TAG
+{
+    WORKLOAD_PROTOCOL_TYPE_UNSPECIFIED,
+    WORKLOAD_PROTOCOL_TYPE_HTTP,
+    WORKLOAD_PROTOCOL_TYPE_UNIX_DOMAIN_SOCKET
+} WORKLOAD_PROTOCOL_TYPE;
+
 static const char* ENVIRONMENT_VAR_WORKLOADURI = "IOTEDGE_WORKLOADURI";
 static const char* ENVIRONMENT_VAR_MODULE_GENERATION_ID = "IOTEDGE_MODULEGENERATIONID";
 static const char* ENVIRONMENT_VAR_EDGEMODULEID = "IOTEDGE_MODULEID";
 
 typedef struct HSM_CLIENT_HTTP_EDGE
 {
+    WORKLOAD_PROTOCOL_TYPE workload_protocol_type;
     char* workload_hostname;
     int   workload_portnumber;
     char* edge_module_generation_id;
@@ -48,6 +56,9 @@ typedef struct HSM_CLIENT_HTTP_EDGE
 
 static const char http_prefix[] = "http://";
 static const int http_prefix_len = sizeof(http_prefix) - 1;
+
+static const char unix_domain_sockets_prefix[] = "http://unix";
+static const int unix_domain_sockets_prefix_len = sizeof(unix_domain_sockets_prefix) - 1;
 
 static HSM_CLIENT_HTTP_EDGE_INTERFACE http_edge_interface = 
 {
@@ -155,12 +166,14 @@ HSM_CLIENT_HANDLE hsm_client_http_edge_create()
     else
     {
         memset(result, 0, sizeof(HSM_CLIENT_HTTP_EDGE));
+        result->workload_protocol_type = WORKLOAD_PROTOCOL_TYPE_UNSPECIFIED;
         if (initialize_http_edge_device(result) != 0)
         {
             LogError("Failure initializing http edge device.");
             hsm_client_http_edge_destroy((HSM_CLIENT_HANDLE)result);
             result = NULL;
         }
+        result->workload_protocol_type = WORKLOAD_PROTOCOL_TYPE_HTTP;
     }
     return (HSM_CLIENT_HANDLE)result;
 }
@@ -394,9 +407,17 @@ static BUFFER_HANDLE send_http_workload_request(HSM_CLIENT_HTTP_EDGE* hsm_client
     workload_context.continue_running = true;
     workload_context.http_response = NULL;
 
-    if ((http_handle = uhttp_client_create(socketio_get_interface_description(), &config, on_edge_hsm_http_error, &workload_context)) == NULL)
+    IO_INTERFACE_DESCRIPTION* socketio_interface = socketio_get_interface_description();
+
+    if ((http_handle = uhttp_client_create(socketio_interface(), &config, on_edge_hsm_http_error, &workload_context)) == NULL)
     {
         LogError("uhttp_client_create failed");
+        result = __FAILURE__;
+    }
+    else if ((hsm_client_http_edge->workload_protocol_type == WORKLOAD_PROTOCOL_TYPE_UNIX_DOMAIN_SOCKET) &&
+             (uhttp_client_set_option(http_handle, OPTION_ADDRESS_TYPE, OPTION_ADDRESS_TYPE_DOMAIN_SOCKET) != 0))
+    {
+        LogError("setting unix domain socket option failed");
         result = __FAILURE__;
     }
     else if ((http_open_result = uhttp_client_open(http_handle, hsm_client_http_edge->workload_hostname, hsm_client_http_edge->workload_portnumber, on_edge_hsm_http_connected, &workload_context) != HTTP_CLIENT_OK) != HTTP_CLIENT_OK)
