@@ -12,6 +12,7 @@
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/socketio.h"
 #include "azure_c_shared_utility/base64.h"
+#include "azure_c_shared_utility/shared_util_options.h"
 #include "azure_uhttp_c/uhttp.h"
 
 #include "azure_c_shared_utility/envvariable.h"
@@ -407,9 +408,7 @@ static BUFFER_HANDLE send_http_workload_request(HSM_CLIENT_HTTP_EDGE* hsm_client
     workload_context.continue_running = true;
     workload_context.http_response = NULL;
 
-    IO_INTERFACE_DESCRIPTION* socketio_interface = socketio_get_interface_description();
-
-    if ((http_handle = uhttp_client_create(socketio_interface(), &config, on_edge_hsm_http_error, &workload_context)) == NULL)
+    if ((http_handle = uhttp_client_create(socketio_get_interface_description(), &config, on_edge_hsm_http_error, &workload_context)) == NULL)
     {
         LogError("uhttp_client_create failed");
         result = __FAILURE__;
