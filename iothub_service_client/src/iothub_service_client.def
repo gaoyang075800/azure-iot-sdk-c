@@ -21,6 +21,12 @@ EXPORTS
     IoTHubServiceClient_GetVersionString
     IoTHubServiceClientAuth_CreateFromConnectionString
     IoTHubServiceClientAuth_Destroy
+    IoTHubDeviceConfiguration_Create
+    IoTHubDeviceConfiguration_Destroy
+    IoTHubDeviceConfiguration_GetConfiguration
+    IoTHubDeviceConfiguration_AddConfiguration
+    IoTHubDeviceConfiguration_UpdateConfiguration
+    IoTHubDeviceConfiguration_DeleteConfiguration
     IoTHubDeviceMethod_Create
     IoTHubDeviceMethod_Destroy
     IoTHubDeviceMethod_Invoke
