@@ -5,7 +5,7 @@
 
 #include "iothub_deviceconfiguration.h"
 
-BEGIN_TEST_SUITE(iothub_devicetwin_ut)
+BEGIN_TEST_SUITE(iothub_deviceconfiguration_ut)
 
 TEST_SUITE_INITIALIZE(TestClassInitialize)
 {
@@ -27,4 +27,4 @@ TEST_FUNCTION(Test)
 {
 }
 
-END_TEST_SUITE(iothub_devicetwin_ut)
+END_TEST_SUITE(iothub_deviceconfiguration_ut)
