@@ -58,7 +58,7 @@ typedef struct HSM_CLIENT_HTTP_EDGE
 static const char http_prefix[] = "http://";
 static const int http_prefix_len = sizeof(http_prefix) - 1;
 
-static const char unix_domain_sockets_prefix[] = "http://unix";
+static const char unix_domain_sockets_prefix[] = "unix://";
 static const int unix_domain_sockets_prefix_len = sizeof(unix_domain_sockets_prefix) - 1;
 
 static HSM_CLIENT_HTTP_EDGE_INTERFACE http_edge_interface = 
@@ -146,7 +146,8 @@ static int read_and_parse_edge_uri(HSM_CLIENT_HTTP_EDGE* hsm_client_http_edge)
                 LogError("hostname does not have content after prefix");
                 result = __FAILURE__;
             }
-            else if (mallocAndStrcpy_s(&hsm_client_http_edge->workload_hostname, workload_uri + unix_domain_sockets_prefix_len) != 0)
+			// The name we connect to is of form "/...", so we copy over the final "/' as part of workload_hostname
+            else if (mallocAndStrcpy_s(&hsm_client_http_edge->workload_hostname, workload_uri + unix_domain_sockets_prefix_len - 1) != 0)
             {
                 LogError("Failed copying workload hostname");
                 result = __FAILURE__;
