@@ -42,7 +42,6 @@ static int my_mallocAndStrcpy_s(char** destination, const char* source)
 #include "umocktypes_bool.h"
 #include "umocktypes_stdint.h"
 
-
 #define ENABLE_MOCKS
 
 #include "azure_c_shared_utility/gballoc.h"
@@ -56,6 +55,19 @@ static int my_mallocAndStrcpy_s(char** destination, const char* source)
 #include "azure_c_shared_utility/httpapiex.h"
 #include "azure_c_shared_utility/httpapiexsas.h"
 #include "azure_c_shared_utility/uniqueid.h"
+#include "parson.h"
+
+MOCKABLE_FUNCTION(, JSON_Value*, json_parse_string, const char *, string);
+MOCKABLE_FUNCTION(, JSON_Object*, json_value_get_object, const JSON_Value *, value);
+MOCKABLE_FUNCTION(, JSON_Value*, json_object_get_value, const JSON_Object *, object, const char *, name);
+MOCKABLE_FUNCTION(, const char*, json_object_get_string, const JSON_Object*, object, const char *, name);
+MOCKABLE_FUNCTION(, const char*, json_value_get_string, const JSON_Value*, value);
+MOCKABLE_FUNCTION(, double, json_value_get_number, const JSON_Value*, value);
+MOCKABLE_FUNCTION(, JSON_Value_Type, json_value_get_type, const JSON_Value*, value);
+
+MOCKABLE_FUNCTION(, JSON_Status, json_object_clear, JSON_Object*, object);
+MOCKABLE_FUNCTION(, void, json_value_free, JSON_Value *, value);
+MOCKABLE_FUNCTION(, char*, json_serialize_to_string, const JSON_Value*, value);
 
 #undef ENABLE_MOCKS
 
@@ -84,6 +96,20 @@ static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 STRING_HANDLE my_STRING_construct(const char* psz)
 {
     (void)psz;
+    return (STRING_HANDLE)my_gballoc_malloc(1);
+}
+
+STRING_HANDLE my_STRING_construct_n(const char* psz, size_t n)
+{
+    (void)psz;
+    n = 0;
+    return (STRING_HANDLE)my_gballoc_malloc(1);
+}
+
+STRING_HANDLE my_STRING_from_byte_array(const unsigned char* psz, size_t n)
+{
+    (void)psz;
+    n = 0;
     return (STRING_HANDLE)my_gballoc_malloc(1);
 }
 
@@ -142,7 +168,101 @@ void my_HTTPAPIEX_SAS_Destroy(HTTPAPIEX_SAS_HANDLE handle)
 {
     my_gballoc_free(handle);
 }
+
+char* my_json_serialize_to_string(const JSON_Value *value)
+{
+    (void)value;
+    char* s = (char*)my_gballoc_malloc(1);
+    *s=0;
+    return s;
+}
+
+JSON_Value *my_json_parse_string(const char *string)
+{
+    (void)string;
+    return (JSON_Value*)my_gballoc_malloc(1);
+}
+
+void my_json_value_free(JSON_Value *value)
+{
+    my_gballoc_free(value);
+}
+
 #include "iothub_deviceconfiguration.h"
+#include "iothub_service_client_auth.h"
+
+typedef struct IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_TAG
+{
+    char* hostname;
+    char* sharedAccessKey;
+    char* keyName;
+} IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION;
+
+static IOTHUB_SERVICE_CLIENT_AUTH TEST_IOTHUB_SERVICE_CLIENT_AUTH;
+static IOTHUB_SERVICE_CLIENT_AUTH_HANDLE TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE = &TEST_IOTHUB_SERVICE_CLIENT_AUTH;
+
+static IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION TEST_IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION;
+static IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE TEST_IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE = &TEST_IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION;
+
+static const char* TEST_STRING_VALUE = "Test string value";
+static const char* TEST_CONST_CHAR_PTR = "TestConstChar";
+
+static char* TEST_HOSTNAME = "theHostName";
+static char* TEST_IOTHUBNAME = "theIotHubName";
+static char* TEST_IOTHUBSUFFIX = "theIotHubSuffix";
+static char* TEST_SHAREDACCESSKEY = "theSharedAccessKey";
+static char* TEST_SHAREDACCESSKEYNAME = "theSharedAccessKeyName";
+
+static const HTTP_HEADERS_HANDLE TEST_HTTP_HEADERS_HANDLE = (HTTP_HEADERS_HANDLE)0x4545;
+
+static const unsigned int httpStatusCodeOk = 200;
+static const unsigned int httpStatusCodeBadRequest = 400;
+
+static const char* TEST_HTTP_HEADER_KEY_AUTHORIZATION = "Authorization";
+static const char* TEST_HTTP_HEADER_VAL_AUTHORIZATION = " ";
+static const char* TEST_HTTP_HEADER_KEY_REQUEST_ID = "Request-Id";
+static const char* TEST_HTTP_HEADER_VAL_REQUEST_ID = "1001";
+static const char* TEST_HTTP_HEADER_KEY_USER_AGENT = "User-Agent";
+static const char* TEST_HTTP_HEADER_KEY_ACCEPT = "Accept";
+static const char* TEST_HTTP_HEADER_VAL_ACCEPT = "application/json";
+static const char* TEST_HTTP_HEADER_KEY_CONTENT_TYPE = "Content-Type";
+static const char* TEST_HTTP_HEADER_VAL_CONTENT_TYPE = "application/json; charset=utf-8";
+static const char* TEST_HTTP_HEADER_KEY_IFMATCH = "If-Match";
+static const char* TEST_HTTP_HEADER_VAL_IFMATCH = "*";
+
+static JSON_Value* TEST_JSON_VALUE = (JSON_Value*)0x5050;
+static JSON_Object* TEST_JSON_OBJECT = (JSON_Object*)0x5151;
+static JSON_Status TEST_JSON_STATUS = 0;
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+    int STRING_sprintf(STRING_HANDLE handle, const char* format, ...);
+    STRING_HANDLE STRING_construct_sprintf(const char* format, ...);
+    
+    int STRING_sprintf(STRING_HANDLE handle, const char* format, ...)
+    {
+        (void)handle;
+        (void)format;
+        return 0;
+    }
+    
+    STRING_HANDLE STRING_construct_sprintf(const char* format, ...)
+    {
+        (void)format;
+        return (STRING_HANDLE)my_gballoc_malloc(1);
+    }
+    
+    const char* my_STRING_c_str(STRING_HANDLE handle)
+    {
+        (void)handle;
+        return TEST_STRING_VALUE;
+    }
+    
+#ifdef __cplusplus
+}
+#endif
 
 BEGIN_TEST_SUITE(iothub_deviceconfiguration_ut)
 
@@ -158,7 +278,93 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
     int result = umocktypes_charptr_register_types();
     ASSERT_ARE_EQUAL(int, 0, result);
 
-
+    REGISTER_TYPE(HTTPAPI_RESULT, HTTPAPI_RESULT);
+    REGISTER_TYPE(HTTPAPIEX_RESULT, HTTPAPIEX_RESULT);
+    REGISTER_TYPE(HTTP_HEADERS_RESULT, HTTP_HEADERS_RESULT);
+    REGISTER_TYPE(HTTPAPI_REQUEST_TYPE, HTTPAPI_REQUEST_TYPE);
+    REGISTER_UMOCK_ALIAS_TYPE(VECTOR_HANDLE, void*);
+    REGISTER_UMOCK_ALIAS_TYPE(const VECTOR_HANDLE, void*);
+    REGISTER_UMOCK_ALIAS_TYPE(PREDICATE_FUNCTION, void*);
+    REGISTER_UMOCK_ALIAS_TYPE(BUFFER_HANDLE, void*);
+    REGISTER_UMOCK_ALIAS_TYPE(STRING_HANDLE, void*);
+    REGISTER_UMOCK_ALIAS_TYPE(HTTP_HEADERS_HANDLE, void*);
+    REGISTER_UMOCK_ALIAS_TYPE(HTTP_HANDLE, void*);
+    REGISTER_UMOCK_ALIAS_TYPE(HTTPAPIEX_HANDLE, void*);
+    REGISTER_UMOCK_ALIAS_TYPE(HTTPAPIEX_SAS_HANDLE, void*);
+    REGISTER_UMOCK_ALIAS_TYPE(JSON_Value_Type, int);
+    
+    REGISTER_GLOBAL_MOCK_HOOK(gballoc_malloc, my_gballoc_malloc);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(gballoc_malloc, NULL);
+    
+    REGISTER_GLOBAL_MOCK_HOOK(gballoc_free, my_gballoc_free);
+    
+    REGISTER_GLOBAL_MOCK_HOOK(mallocAndStrcpy_s, my_mallocAndStrcpy_s);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(mallocAndStrcpy_s, 42);
+    
+    REGISTER_GLOBAL_MOCK_HOOK(STRING_construct, my_STRING_construct);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_construct, NULL);
+    
+    REGISTER_GLOBAL_MOCK_HOOK(STRING_construct_n, my_STRING_construct_n);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_construct_n, NULL);
+    
+    REGISTER_GLOBAL_MOCK_HOOK(STRING_from_byte_array, my_STRING_from_byte_array);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_from_byte_array, NULL);
+    
+    REGISTER_GLOBAL_MOCK_HOOK(STRING_c_str, my_STRING_c_str);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_c_str, NULL);
+    
+    REGISTER_GLOBAL_MOCK_HOOK(STRING_delete, my_STRING_delete);
+    
+    REGISTER_GLOBAL_MOCK_HOOK(BUFFER_new, my_BUFFER_new);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(BUFFER_new, NULL);
+    
+    REGISTER_GLOBAL_MOCK_HOOK(BUFFER_create, my_BUFFER_create);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(BUFFER_create, NULL);
+    
+    REGISTER_GLOBAL_MOCK_HOOK(BUFFER_delete, my_BUFFER_delete);
+    
+    REGISTER_GLOBAL_MOCK_HOOK(HTTPHeaders_Alloc, my_HTTPHeaders_Alloc);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(HTTPHeaders_Alloc, NULL);
+    
+    REGISTER_GLOBAL_MOCK_HOOK(HTTPHeaders_Free, my_HTTPHeaders_Free);
+    REGISTER_GLOBAL_MOCK_RETURN(HTTPHeaders_AddHeaderNameValuePair, HTTP_HEADERS_OK);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(HTTPHeaders_AddHeaderNameValuePair, HTTP_HEADERS_ERROR);
+    
+    REGISTER_GLOBAL_MOCK_HOOK(HTTPAPIEX_Create, my_HTTPAPIEX_Create);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(HTTPAPIEX_Create, NULL);
+    
+    REGISTER_GLOBAL_MOCK_HOOK(HTTPAPIEX_Destroy, my_HTTPAPIEX_Destroy);
+    
+    REGISTER_GLOBAL_MOCK_HOOK(HTTPAPIEX_SAS_Create, my_HTTPAPIEX_SAS_Create);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(HTTPAPIEX_SAS_Create, NULL);
+    
+    REGISTER_GLOBAL_MOCK_HOOK(HTTPAPIEX_SAS_Destroy, my_HTTPAPIEX_SAS_Destroy);
+    
+    REGISTER_GLOBAL_MOCK_RETURN(HTTPAPIEX_SAS_ExecuteRequest, HTTPAPIEX_OK);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(HTTPAPIEX_SAS_ExecuteRequest, HTTPAPIEX_ERROR);
+    
+    REGISTER_GLOBAL_MOCK_HOOK(json_parse_string, my_json_parse_string);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_parse_string, NULL);
+    
+    REGISTER_GLOBAL_MOCK_HOOK(json_value_free, my_json_value_free);
+    
+    REGISTER_GLOBAL_MOCK_RETURN(json_value_get_object, TEST_JSON_OBJECT);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_value_get_object, NULL);
+    
+    REGISTER_GLOBAL_MOCK_RETURN(json_object_get_value, TEST_JSON_VALUE);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_object_get_value, NULL);
+    
+    REGISTER_GLOBAL_MOCK_RETURN(json_object_get_string, TEST_CONST_CHAR_PTR);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_object_get_string, NULL);
+    
+    REGISTER_GLOBAL_MOCK_RETURN(json_value_get_string, TEST_CONST_CHAR_PTR);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_value_get_string, NULL);
+    
+    REGISTER_GLOBAL_MOCK_RETURN(json_value_get_number, 42);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_value_get_number, 0);
+    
+    REGISTER_GLOBAL_MOCK_HOOK(json_serialize_to_string, my_json_serialize_to_string);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_serialize_to_string, NULL);
 }
 
 TEST_SUITE_CLEANUP(TestClassCleanup)
