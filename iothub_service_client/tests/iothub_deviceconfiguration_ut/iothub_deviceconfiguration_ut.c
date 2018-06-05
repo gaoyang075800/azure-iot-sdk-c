@@ -173,7 +173,7 @@ char* my_json_serialize_to_string(const JSON_Value *value)
 {
     (void)value;
     char* s = (char*)my_gballoc_malloc(1);
-    *s=0;
+    *s = 0;
     return s;
 }
 
@@ -240,26 +240,26 @@ extern "C"
 #endif
     int STRING_sprintf(STRING_HANDLE handle, const char* format, ...);
     STRING_HANDLE STRING_construct_sprintf(const char* format, ...);
-    
+
     int STRING_sprintf(STRING_HANDLE handle, const char* format, ...)
     {
         (void)handle;
         (void)format;
         return 0;
     }
-    
+
     STRING_HANDLE STRING_construct_sprintf(const char* format, ...)
     {
         (void)format;
         return (STRING_HANDLE)my_gballoc_malloc(1);
     }
-    
+
     const char* my_STRING_c_str(STRING_HANDLE handle)
     {
         (void)handle;
         return TEST_STRING_VALUE;
     }
-    
+
 #ifdef __cplusplus
 }
 #endif
@@ -292,77 +292,77 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
     REGISTER_UMOCK_ALIAS_TYPE(HTTPAPIEX_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(HTTPAPIEX_SAS_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(JSON_Value_Type, int);
-    
+
     REGISTER_GLOBAL_MOCK_HOOK(gballoc_malloc, my_gballoc_malloc);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(gballoc_malloc, NULL);
-    
+
     REGISTER_GLOBAL_MOCK_HOOK(gballoc_free, my_gballoc_free);
-    
+
     REGISTER_GLOBAL_MOCK_HOOK(mallocAndStrcpy_s, my_mallocAndStrcpy_s);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(mallocAndStrcpy_s, 42);
-    
+
     REGISTER_GLOBAL_MOCK_HOOK(STRING_construct, my_STRING_construct);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_construct, NULL);
-    
+
     REGISTER_GLOBAL_MOCK_HOOK(STRING_construct_n, my_STRING_construct_n);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_construct_n, NULL);
-    
+
     REGISTER_GLOBAL_MOCK_HOOK(STRING_from_byte_array, my_STRING_from_byte_array);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_from_byte_array, NULL);
-    
+
     REGISTER_GLOBAL_MOCK_HOOK(STRING_c_str, my_STRING_c_str);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_c_str, NULL);
-    
+
     REGISTER_GLOBAL_MOCK_HOOK(STRING_delete, my_STRING_delete);
-    
+
     REGISTER_GLOBAL_MOCK_HOOK(BUFFER_new, my_BUFFER_new);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(BUFFER_new, NULL);
-    
+
     REGISTER_GLOBAL_MOCK_HOOK(BUFFER_create, my_BUFFER_create);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(BUFFER_create, NULL);
-    
+
     REGISTER_GLOBAL_MOCK_HOOK(BUFFER_delete, my_BUFFER_delete);
-    
+
     REGISTER_GLOBAL_MOCK_HOOK(HTTPHeaders_Alloc, my_HTTPHeaders_Alloc);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(HTTPHeaders_Alloc, NULL);
-    
+
     REGISTER_GLOBAL_MOCK_HOOK(HTTPHeaders_Free, my_HTTPHeaders_Free);
     REGISTER_GLOBAL_MOCK_RETURN(HTTPHeaders_AddHeaderNameValuePair, HTTP_HEADERS_OK);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(HTTPHeaders_AddHeaderNameValuePair, HTTP_HEADERS_ERROR);
-    
+
     REGISTER_GLOBAL_MOCK_HOOK(HTTPAPIEX_Create, my_HTTPAPIEX_Create);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(HTTPAPIEX_Create, NULL);
-    
+
     REGISTER_GLOBAL_MOCK_HOOK(HTTPAPIEX_Destroy, my_HTTPAPIEX_Destroy);
-    
+
     REGISTER_GLOBAL_MOCK_HOOK(HTTPAPIEX_SAS_Create, my_HTTPAPIEX_SAS_Create);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(HTTPAPIEX_SAS_Create, NULL);
-    
+
     REGISTER_GLOBAL_MOCK_HOOK(HTTPAPIEX_SAS_Destroy, my_HTTPAPIEX_SAS_Destroy);
-    
+
     REGISTER_GLOBAL_MOCK_RETURN(HTTPAPIEX_SAS_ExecuteRequest, HTTPAPIEX_OK);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(HTTPAPIEX_SAS_ExecuteRequest, HTTPAPIEX_ERROR);
-    
+
     REGISTER_GLOBAL_MOCK_HOOK(json_parse_string, my_json_parse_string);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_parse_string, NULL);
-    
+
     REGISTER_GLOBAL_MOCK_HOOK(json_value_free, my_json_value_free);
-    
+
     REGISTER_GLOBAL_MOCK_RETURN(json_value_get_object, TEST_JSON_OBJECT);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_value_get_object, NULL);
-    
+
     REGISTER_GLOBAL_MOCK_RETURN(json_object_get_value, TEST_JSON_VALUE);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_object_get_value, NULL);
-    
+
     REGISTER_GLOBAL_MOCK_RETURN(json_object_get_string, TEST_CONST_CHAR_PTR);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_object_get_string, NULL);
-    
+
     REGISTER_GLOBAL_MOCK_RETURN(json_value_get_string, TEST_CONST_CHAR_PTR);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_value_get_string, NULL);
-    
+
     REGISTER_GLOBAL_MOCK_RETURN(json_value_get_number, 42);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_value_get_number, 0);
-    
+
     REGISTER_GLOBAL_MOCK_HOOK(json_serialize_to_string, my_json_serialize_to_string);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_serialize_to_string, NULL);
 }
@@ -382,6 +382,12 @@ TEST_FUNCTION_INITIALIZE(TestMethodInitialize)
     }
 
     umock_c_reset_all_calls();
+
+    TEST_IOTHUB_SERVICE_CLIENT_AUTH.hostname = TEST_HOSTNAME;
+    TEST_IOTHUB_SERVICE_CLIENT_AUTH.iothubName = TEST_IOTHUBNAME;
+    TEST_IOTHUB_SERVICE_CLIENT_AUTH.iothubSuffix = TEST_IOTHUBSUFFIX;
+    TEST_IOTHUB_SERVICE_CLIENT_AUTH.sharedAccessKey = TEST_SHAREDACCESSKEY;
+    TEST_IOTHUB_SERVICE_CLIENT_AUTH.keyName = TEST_SHAREDACCESSKEYNAME;
 }
 
 TEST_FUNCTION_CLEANUP(TestMethodCleanup)
@@ -397,6 +403,163 @@ TEST_FUNCTION(IoTHubDeviceConfiguration_Create_return_null_if_input_parameter_se
 
     ASSERT_IS_NULL(result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+}
+
+/*Tests_SRS_IOTHUBDEVICECONFIGURATION_01_002: [ If any member of the serviceClientHandle input parameter is NULL IoTHubDeviceConfiguration_Create shall return NULL ]*/
+TEST_FUNCTION(IoTHubDeviceConfiguration_Create_return_null_if_input_parameter_serviceClientHandle_hostName_is_NULL)
+{
+    // arrange
+    TEST_IOTHUB_SERVICE_CLIENT_AUTH.hostname = NULL;
+
+    // act
+    IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE result = IoTHubDeviceConfiguration_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
+
+    // assert
+    ASSERT_IS_NULL(result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+}
+
+/*Tests_SRS_IOTHUBDEVICECONFIGURATION_01_002: [ If any member of the serviceClientHandle input parameter is NULL IoTHubDeviceConfiguration_Create shall return NULL ]*/
+TEST_FUNCTION(IoTHubDeviceConfiguration_Create_return_null_if_input_parameter_serviceClientHandle_iothubName_is_NULL)
+{
+    // arrange
+    TEST_IOTHUB_SERVICE_CLIENT_AUTH.iothubName = NULL;
+
+    // act
+    IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE result = IoTHubDeviceConfiguration_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
+
+    // assert
+    ASSERT_IS_NULL(result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+}
+
+/*Tests_SRS_IOTHUBDEVICECONFIGURATION_01_002: [ If any member of the serviceClientHandle input parameter is NULL IoTHubDeviceConfiguration_Create shall return NULL ]*/
+TEST_FUNCTION(IoTHubDeviceConfiguration_Create_return_null_if_input_parameter_serviceClientHandle_iothubSuffix_is_NULL)
+{
+    // arrange
+    TEST_IOTHUB_SERVICE_CLIENT_AUTH.iothubSuffix = NULL;
+
+    // act
+    IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE result = IoTHubDeviceConfiguration_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
+
+    // assert
+    ASSERT_IS_NULL(result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+}
+
+/*Tests_SRS_IOTHUBDEVICECONFIGURATION_01_002: [ If any member of the serviceClientHandle input parameter is NULL IoTHubDeviceConfiguration_Create shall return NULL ]*/
+TEST_FUNCTION(IoTHubDeviceConfiguration_Create_return_null_if_input_parameter_serviceClientHandle_keyName_is_NULL)
+{
+    // arrange
+    TEST_IOTHUB_SERVICE_CLIENT_AUTH.keyName = NULL;
+
+    // act
+    IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE result = IoTHubDeviceConfiguration_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
+
+    // assert
+    ASSERT_IS_NULL(result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+}
+
+/*Tests_SRS_IOTHUBDEVICECONFIGURATION_01_002: [ If any member of the serviceClientHandle input parameter is NULL IoTHubDeviceConfiguration_Create shall return NULL ]*/
+TEST_FUNCTION(IoTHubDeviceConfiguration_Create_return_null_if_input_parameter_serviceClientHandle_sharedAccessKey_is_NULL)
+{
+    // arrange
+    TEST_IOTHUB_SERVICE_CLIENT_AUTH.sharedAccessKey = NULL;
+
+    // act
+    IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE result = IoTHubDeviceConfiguration_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
+
+    // assert
+    ASSERT_IS_NULL(result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+}
+
+/*Tests_SRS_IOTHUBDEVICECONFIGURATION_01_003: [ IoTHubDeviceConfiguration_Create shall allocate memory for a new IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE instance ]*/
+/*Tests_SRS_IOTHUBDEVICECONFIGURATION_01_005: [ If the allocation successful, IoTHubDeviceConfiguration_Create shall create a IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE from the given IOTHUB_SERVICE_CLIENT_AUTH_HANDLE and return with it ]*/
+/*Tests_SRS_IOTHUBDEVICECONFIGURATION_01_006: [ IoTHubDeviceConfiguration_Create shall allocate memory and copy hostName to result-hostName by calling mallocAndStrcpy_s. ]*/
+/*Tests_SRS_IOTHUBDEVICECONFIGURATION_01_008: [ IoTHubDeviceConfiguration_Create shall allocate memory and copy iothubName to result->iothubName by calling mallocAndStrcpy_s. ]*/
+/*Tests_SRS_IOTHUBDEVICECONFIGURATION_01_010: [ IoTHubDeviceConfiguration_Create shall allocate memory and copy iothubSuffix to result->iothubSuffix by calling mallocAndStrcpy_s. ]*/
+/*Tests_SRS_IOTHUBDEVICECONFIGURATION_01_012: [ IoTHubDeviceConfiguration_Create shall allocate memory and copy sharedAccessKey to result->sharedAccessKey by calling mallocAndStrcpy_s. ]*/
+/*Tests_SRS_IOTHUBDEVICECONFIGURATION_01_014: [ IoTHubDeviceConfiguration_Create shall allocate memory and copy keyName to `result->keyName` by calling mallocAndStrcpy_s. ]*/
+TEST_FUNCTION(IoTHubDeviceConfiguration_Create_happy_path)
+{
+    // arrange
+    EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+        .IgnoreArgument(1);
+
+    EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .IgnoreAllArguments();
+
+    EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .IgnoreAllArguments();
+
+    EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .IgnoreAllArguments();
+
+    // act
+    IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE result = IoTHubDeviceConfiguration_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
+
+    // assert
+    ASSERT_IS_NOT_NULL(result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    ASSERT_ARE_EQUAL(char_ptr, result->hostname, TEST_HOSTNAME);
+
+    ///cleanup
+    if (result != NULL)
+    {
+        free(result->hostname);
+        free(result->keyName);
+        free(result->sharedAccessKey);
+        free(result);
+        result = NULL;
+    }
+}
+
+/*Tests_SRS_IOTHUBDEVICECONFIGURATION_01_004: [ If the allocation failed, IoTHubDeviceConfiguration_Create shall return NULL ]*/
+/*Tests_SRS_IOTHUBDEVICECONFIGURATION_01_007: [ If the mallocAndStrcpy_s fails, IoTHubDeviceConfiguration_Create shall do clean up and return NULL. ]*/
+/*Tests_SRS_IOTHUBDEVICECONFIGURATION_01_009: [ If the mallocAndStrcpy_s fails, IoTHubDeviceConfiguration_Create shall do clean up and return NULL. ]*/
+/*Tests_SRS_IOTHUBDEVICECONFIGURATION_01_011: [ If the mallocAndStrcpy_s fails, IoTHubDeviceConfiguration_Create shall do clean up and return NULL. ]*/
+/*Tests_SRS_IOTHUBDEVICECONFIGURATION_01_013: [ If the mallocAndStrcpy_s fails, IoTHubDeviceConfiguration_Create shall do clean up and return NULL. ]*/
+/*Tests_SRS_IOTHUBDEVICECONFIGURATION_01_015: [ If the mallocAndStrcpy_s fails, IoTHubDeviceConfiguration_Create shall do clean up and return NULL. ]*/
+TEST_FUNCTION(IoTHubDeviceConfiguration_Create_non_happy_path)
+{
+    // arrange
+    int umockc_result = umock_c_negative_tests_init();
+    ASSERT_ARE_EQUAL(int, 0, umockc_result);
+
+    EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+        .IgnoreArgument(1);
+
+    EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, (const char*)(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE->hostname)))
+        .IgnoreArgument(1);
+
+    EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, (const char*)(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE->iothubName)))
+        .IgnoreArgument(1);
+
+    EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, (const char*)(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE->keyName)))
+        .IgnoreArgument(1);
+
+    umock_c_negative_tests_snapshot();
+
+    ///act
+    for (size_t i = 0; i < umock_c_negative_tests_call_count(); i++)
+    {
+        /// arrange
+        umock_c_negative_tests_reset();
+        umock_c_negative_tests_fail_call(i);
+
+        /// act
+        IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE result = IoTHubDeviceConfiguration_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
+
+        /// assert
+        ASSERT_ARE_EQUAL(void_ptr, NULL, result);
+
+        ///cleanup
+    }
+    umock_c_negative_tests_deinit();
+
 }
 
 END_TEST_SUITE(iothub_deviceconfiguration_ut)

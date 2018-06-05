@@ -19,25 +19,102 @@
 #include "parson.h"
 #include "iothub_deviceconfiguration.h"
 
+typedef struct IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_TAG
+{
+    char* hostname;
+    char* sharedAccessKey;
+    char* keyName;
+} IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION;
+
+static void free_deviceconfiguration_handle(IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION* deviceConfiguration)
+{
+    free(deviceConfiguration->hostname);
+    free(deviceConfiguration->sharedAccessKey);
+    free(deviceConfiguration->keyName);
+    free(deviceConfiguration);
+}
+
 IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE IoTHubDeviceConfiguration_Create(IOTHUB_SERVICE_CLIENT_AUTH_HANDLE serviceClientHandle)
 {
+    IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE result;
+
     /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_001: [ If the serviceClientHandle input parameter is NULL IoTHubDeviceConfiguration_Create shall return NULL ]*/
     if(serviceClientHandle == NULL)
     {
         LogError("IotHubDeviceConfiguration_Create: serviceClientHandle is null");
-        return NULL;
+        result = NULL;
     }
-
-    IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE result;
-
-    result = malloc(sizeof(IOTHUB_DEVICE_CONFIGURATION));
-    if (result == NULL)
+    else
     {
-        /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_002: [ If the allocation failed, IoTHubDeviceConfiguration_Create shall return NULL ]*/
-        LogError("Malloc failed for IOTHUB_DEVICE_CONFIGURATION");
-    }
+        /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_002: [ If any member of the serviceClientHandle input parameter is NULL IoTHubDeviceConfiguration_Create shall return NULL ]*/
+        IOTHUB_SERVICE_CLIENT_AUTH* serviceClientAuth = (IOTHUB_SERVICE_CLIENT_AUTH*)serviceClientHandle;
 
-    memset(result, 0, sizeof(IOTHUB_DEVICE_CONFIGURATION));
+        if (serviceClientAuth->hostname == NULL)
+        {
+            LogError("authInfo->hostName input parameter cannot be NULL");
+            result = NULL;
+        }
+        else if (serviceClientAuth->iothubName == NULL)
+        {
+            LogError("authInfo->iothubName input parameter cannot be NULL");
+            result = NULL;
+        }
+        else if (serviceClientAuth->iothubSuffix == NULL)
+        {
+            LogError("authInfo->iothubSuffix input parameter cannot be NULL");
+            result = NULL;
+        }
+        else if (serviceClientAuth->keyName == NULL)
+        {
+            LogError("authInfo->keyName input parameter cannot be NULL");
+            result = NULL;
+        }
+        else if (serviceClientAuth->sharedAccessKey == NULL)
+        {
+            LogError("authInfo->sharedAccessKey input parameter cannot be NULL");
+            result = NULL;
+        }
+        else
+        {
+            /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_003: [ IoTHubDeviceMethod_Create shall allocate memory for a new IOTHUB_SERVICE_CLIENT_DEVICE_METHOD_HANDLE instance ]*/
+            result = malloc(sizeof(IOTHUB_DEVICE_CONFIGURATION));
+            if (result == NULL)
+            {
+                /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_002: [ If the allocation failed, IoTHubDeviceConfiguration_Create shall return NULL ]*/
+                LogError("Malloc failed for IOTHUB_DEVICE_CONFIGURATION");
+            }
+            else
+            {
+                memset(result, 0, sizeof(IOTHUB_DEVICE_CONFIGURATION));
+
+                /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_005: [ If the allocation successful, IoTHubDeviceConfiguration_Create shall create a IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE from the given IOTHUB_SERVICE_CLIENT_AUTH_HANDLE and return with it ]*/
+                /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_006: [ IoTHubDeviceConfiguration_Create shall allocate memory and copy hostName to result->hostName by calling mallocAndStrcpy_s. ]*/
+                if (mallocAndStrcpy_s(&result->hostname, serviceClientAuth->hostname) != 0)
+                {
+                    /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_007: [ If the mallocAndStrcpy_s fails, IoTHubDeviceConfiguration_Create shall do clean up and return NULL. ]*/
+                    LogError("mallocAndStrcpy_s failed for hostName");
+                    free_deviceconfiguration_handle(result);
+                    result = NULL;
+                }
+                /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_012: [ IoTHubDeviceConfiguration_Create shall allocate memory and copy sharedAccessKey to result->sharedAccessKey by calling mallocAndStrcpy_s. ]*/
+                else if (mallocAndStrcpy_s(&result->sharedAccessKey, serviceClientAuth->sharedAccessKey) != 0)
+                {
+                    /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_013: [ If the mallocAndStrcpy_s fails, IoTHubDeviceConfiguration_Create shall do clean up and return NULL. ]*/
+                    LogError("mallocAndStrcpy_s failed for sharedAccessKey");
+                    free_deviceconfiguration_handle(result);
+                    result = NULL;
+                }
+                /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_014: [ IoTHubDeviceConfiguration_Create shall allocate memory and copy keyName to result->keyName by calling mallocAndStrcpy_s. ]*/
+                else if (mallocAndStrcpy_s(&result->keyName, serviceClientAuth->keyName) != 0)
+                {
+                    /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_015: [ If the mallocAndStrcpy_s fails, IoTHubDeviceConfiguration_Create shall do clean up and return NULL. ]*/
+                    LogError("mallocAndStrcpy_s failed for keyName");
+                    free_deviceconfiguration_handle(result);
+                    result = NULL;
+                }
+            }
+        }
+    }
 
     return result;
 }

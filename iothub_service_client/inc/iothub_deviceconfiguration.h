@@ -107,6 +107,7 @@ typedef struct IOTHUB_DEVICE_CONFIGURATION_UPDATE_TAG
 */
 typedef struct IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_TAG* IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE;
 
+
 /** @brief  Creates a IoT Hub Service Client DeviceConfiguration handle for use it in consequent APIs.
 *
 * @param    serviceClientHandle    Service client handle.
