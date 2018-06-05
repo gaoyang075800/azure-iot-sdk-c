@@ -22,7 +22,12 @@
 IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE IoTHubDeviceConfiguration_Create(IOTHUB_SERVICE_CLIENT_AUTH_HANDLE serviceClientHandle)
 {
     /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_001: [ If the serviceClientHandle input parameter is NULL IoTHubDeviceConfiguration_Create shall return NULL ]*/
-    (void)serviceClientHandle;
+    if(serviceClientHandle == NULL)
+    {
+        LogError("IotHubDeviceConfiguration_Create: serviceClientHandle is null");
+        return NULL;
+    }
+
     IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE result;
 
     result = malloc(sizeof(IOTHUB_DEVICE_CONFIGURATION));
