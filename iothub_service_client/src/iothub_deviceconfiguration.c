@@ -26,7 +26,7 @@ typedef struct IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_TAG
     char* keyName;
 } IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION;
 
-static void free_deviceconfiguration_handle(IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION* deviceConfiguration)
+static void free_deviceConfiguration_handle(IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION* deviceConfiguration)
 {
     free(deviceConfiguration->hostname);
     free(deviceConfiguration->sharedAccessKey);
@@ -93,7 +93,7 @@ IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE IoTHubDeviceConfiguration_Crea
                 {
                     /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_007: [ If the mallocAndStrcpy_s fails, IoTHubDeviceConfiguration_Create shall do clean up and return NULL. ]*/
                     LogError("mallocAndStrcpy_s failed for hostName");
-                    free_deviceconfiguration_handle(result);
+                    free_deviceConfiguration_handle(result);
                     result = NULL;
                 }
                 /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_012: [ IoTHubDeviceConfiguration_Create shall allocate memory and copy sharedAccessKey to result->sharedAccessKey by calling mallocAndStrcpy_s. ]*/
@@ -101,7 +101,7 @@ IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE IoTHubDeviceConfiguration_Crea
                 {
                     /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_013: [ If the mallocAndStrcpy_s fails, IoTHubDeviceConfiguration_Create shall do clean up and return NULL. ]*/
                     LogError("mallocAndStrcpy_s failed for sharedAccessKey");
-                    free_deviceconfiguration_handle(result);
+                    free_deviceConfiguration_handle(result);
                     result = NULL;
                 }
                 /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_014: [ IoTHubDeviceConfiguration_Create shall allocate memory and copy keyName to result->keyName by calling mallocAndStrcpy_s. ]*/
@@ -109,7 +109,7 @@ IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE IoTHubDeviceConfiguration_Crea
                 {
                     /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_015: [ If the mallocAndStrcpy_s fails, IoTHubDeviceConfiguration_Create shall do clean up and return NULL. ]*/
                     LogError("mallocAndStrcpy_s failed for keyName");
-                    free_deviceconfiguration_handle(result);
+                    free_deviceConfiguration_handle(result);
                     result = NULL;
                 }
             }
@@ -121,7 +121,12 @@ IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE IoTHubDeviceConfiguration_Crea
 
 void IoTHubDeviceConfiguration_Destroy(IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE serviceClientDeviceConfigurationHandle)
 {
-    (void)serviceClientDeviceConfigurationHandle;
+    /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_016: [ If the serviceClientDeviceConfigurationHandle input parameter is NULL IoTHubDeviceConfiguration_Destroy shall return ]*/
+    if (serviceClientDeviceConfigurationHandle != NULL)
+    {
+        /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_17: [ If the serviceClientDeviceConfigurationHandle input parameter is not NULL IoTHubDeviceConfiguration_Destroy shall free the memory of it and return ]*/
+        free_deviceConfiguration_handle((IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION*)serviceClientDeviceConfigurationHandle);
+    }
 }
 
 IOTHUB_DEVICE_CONFIGURATION_RESULT IoTHubDeviceConfiguration_GetConfiguration(IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE serviceClientDeviceConfigurationHandle, const char* configurationId, IOTHUB_DEVICE_CONFIGURATION* configuration)

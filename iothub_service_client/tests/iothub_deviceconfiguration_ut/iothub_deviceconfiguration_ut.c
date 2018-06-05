@@ -505,6 +505,8 @@ TEST_FUNCTION(IoTHubDeviceConfiguration_Create_happy_path)
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     ASSERT_ARE_EQUAL(char_ptr, result->hostname, TEST_HOSTNAME);
+    ASSERT_ARE_EQUAL(char_ptr, result->sharedAccessKey, TEST_SHAREDACCESSKEY);
+    ASSERT_ARE_EQUAL(char_ptr, result->keyName, TEST_SHAREDACCESSKEYNAME);
 
     ///cleanup
     if (result != NULL)
@@ -560,6 +562,44 @@ TEST_FUNCTION(IoTHubDeviceConfiguration_Create_non_happy_path)
     }
     umock_c_negative_tests_deinit();
 
+}
+
+/*Tests_SRS_IOTHUBDEVICECONFIGURATION_01_016: [ If the serviceClientDeviceConfigurationHandle input parameter is NULL IoTHubDeviceConfiguration_Destroy shall return ]*/
+TEST_FUNCTION(IoTHubDeviceConfiguration_Destroy_return_if_input_parameter_serviceClientDeviceConfigurationHandle_is_NULL)
+{
+    // arrange
+    
+    // act
+    IoTHubDeviceConfiguration_Destroy(NULL);
+    
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+}
+
+/*Tests_SRS_IOTHUBDEVICECONFIGURATION_01_017: [ If the serviceClientDeviceConfigurationHandle input parameter is not NULL IoTHubDeviceConfiguration_Destroy shall free the memory of it and return ]*/
+TEST_FUNCTION(IoTHubDeviceConfiguration_Destroy_do_clean_up_and_return_if_input_parameter_serviceClientDeviceConfigurationHandle_is_not_NULL)
+{
+    // arrange
+    IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE handle = IoTHubDeviceConfiguration_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
+
+    ASSERT_IS_NOT_NULL(handle);
+
+    umock_c_reset_all_calls();
+
+    EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    .IgnoreArgument(1);
+    EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    .IgnoreArgument(1);
+    EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    .IgnoreArgument(1);
+    EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    .IgnoreArgument(1);
+    
+    // act
+    IoTHubDeviceConfiguration_Destroy(handle);
+    
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
 
 END_TEST_SUITE(iothub_deviceconfiguration_ut)
