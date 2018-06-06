@@ -18,6 +18,37 @@
 
 #include "parson.h"
 #include "iothub_deviceconfiguration.h"
+#include "iothub_sc_version.h"
+
+#define IOTHUB_DEVICECONFIGURATION_REQUEST_MODE_VALUES  \
+    IOTHUB_DEVICECONFIGURATION_REQUEST_GET,             \
+    IOTHUB_DEVICECONFIGURATION_REQUEST_GET_SINGLE,      \
+    IOTHUB_DEVICECONFIGURATION_REQUEST_ADD,             \
+    IOTHUB_DEVICECONFIGURATION_REQUEST_UPDATE,          \
+    IOTHUB_DEVICECONFIGURATION_REQUEST_DELETE          
+
+DEFINE_ENUM(IOTHUB_DEVICECONFIGURATION_REQUEST_MODE, IOTHUB_DEVICECONFIGURATION_REQUEST_MODE_VALUES);
+DEFINE_ENUM_STRINGS(IOTHUB_DEVICE_CONFIGURATION_RESULT, IOTHUB_DEVICE_CONFIGURATION_RESULT_VALUES);
+
+#define  HTTP_HEADER_KEY_AUTHORIZATION  "Authorization"
+#define  HTTP_HEADER_VAL_AUTHORIZATION  " "
+#define  HTTP_HEADER_KEY_REQUEST_ID  "Request-Id"
+#define  HTTP_HEADER_KEY_USER_AGENT  "User-Agent"
+#define  HTTP_HEADER_VAL_USER_AGENT  IOTHUB_SERVICE_CLIENT_TYPE_PREFIX IOTHUB_SERVICE_CLIENT_BACKSLASH IOTHUB_SERVICE_CLIENT_VERSION
+#define  HTTP_HEADER_KEY_ACCEPT  "Accept"
+#define  HTTP_HEADER_VAL_ACCEPT  "application/json"
+#define  HTTP_HEADER_KEY_CONTENT_TYPE  "Content-Type"
+#define  HTTP_HEADER_VAL_CONTENT_TYPE  "application/json; charset=utf-8"
+#define  HTTP_HEADER_KEY_IFMATCH  "If-Match"
+#define  HTTP_HEADER_VAL_IFMATCH  "'*'"
+#define UID_LENGTH 37
+
+static const char* const URL_API_VERSION = "api-version=2018-03-01-preview";
+
+static const char* const RELATIVE_PATH_FMT_DEVICECONFIGURATION = "/configurations/%s?%s";
+static const char* const RELATIVE_PATH_FMT_DEVICECONFIGURATIONS = "/configurations/?top=%s&%s";
+static const char* const RELATIVE_PATH_FMT_APPLY_DEVICECONFIGURATION = "/devices/%s/applyConfigurationContent?";
+static const char* const RELATIVE_PATH_FMT_DEVICECONFIGURATION_PAYLOAD = "{\"methodName\":\"%s\",\"timeout\":%d,\"payload\":%s}";
 
 typedef struct IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_TAG
 {
@@ -131,11 +162,18 @@ void IoTHubDeviceConfiguration_Destroy(IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATIO
 
 IOTHUB_DEVICE_CONFIGURATION_RESULT IoTHubDeviceConfiguration_GetConfiguration(IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE serviceClientDeviceConfigurationHandle, const char* configurationId, IOTHUB_DEVICE_CONFIGURATION* configuration)
 {
-    (void)serviceClientDeviceConfigurationHandle;
-    (void)configurationId;
+    IOTHUB_DEVICE_CONFIGURATION_RESULT result = IOTHUB_DEVICE_CONFIGURATION_OK;
+
+    /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_18: [ IoTHubDeviceConfiguration_GetConfiguration shall verify the input parameters and if any of them are NULL then return IOTHUB_DEVICE_CONFIGURATION_INVALID_ARG ]*/
+    if ((serviceClientDeviceConfigurationHandle == NULL) || (configurationId == NULL))
+    {
+        LogError("Input parameter cannot be NULL");
+        result = IOTHUB_DEVICE_CONFIGURATION_INVALID_ARG;
+    }
+    
     (void)configuration;
 
-    return IOTHUB_DEVICE_CONFIGURATION_OK;
+    return result;
 }
 
 IOTHUB_DEVICE_CONFIGURATION_RESULT IoTHubDeviceConfiguration_AddConfiguration(IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE serviceClientDeviceConfigurationHandle, const IOTHUB_DEVICE_CONFIGURATION_CREATE* configurationCreate, IOTHUB_DEVICE_CONFIGURATION* configuration)
