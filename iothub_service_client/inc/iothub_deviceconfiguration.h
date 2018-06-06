@@ -53,6 +53,12 @@ typedef struct IOTHUB_DEVICE_CONFIGURATION_LABEL_TAG
     const char** labelValue;
 } IOTHUB_DEVICE_CONFIGURATION_LABELS;
 
+typedef struct IOTHUB_DEVICE_CONFIGURATIONS_RESULTS_TAG
+{
+    const long numConfigurations;
+    const char** configurations;
+} IOTHUB_DEVICE_CONFIGURATIONS_RESULT;
+
 #define IOTHUB_DEVICE_CONFIGURATION_SCHEMA_VERSION_1 "1.0"
 #define IOTHUB_DEVICE_CONFIGURATION_CONTENT_VERSION_1 1
 typedef struct IOTHUB_DEVICE_CONFIGURATION_TAG
@@ -123,13 +129,23 @@ MOCKABLE_FUNCTION(, IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE, IoTHubDev
 */
 MOCKABLE_FUNCTION(, void, IoTHubDeviceConfiguration_Destroy, IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE, serviceClientDeviceConfigurationHandle);
 
+/** @brief  Retrieves the Configuration info for multiple configurations from IoT Hub.
+*
+* @param    serviceClientDeviceConfigurationHandle    The handle created by a call to the create function.
+* @param    maxConfigurationsCount                    Maximum number of configurations requested
+* @param    configurations                            Output parameter, if it is not NULL will contain the requested configurations
+*
+* @return   IOTHUB_DEVICE_CONFIGURATION_RESULT upon success or an error code upon failure.
+*/
+MOCKABLE_FUNCTION(, IOTHUB_DEVICE_CONFIGURATION_RESULT, IoTHubDeviceConfiguration_GetConfigurations, IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE, serviceClientDeviceConfigurationHandle, const int, maxConfigurationsCount, IOTHUB_DEVICE_CONFIGURATIONS_RESULT*, configurations);
+
 /** @brief  Retrieves the Configuration info for specified configurationId from IoT Hub.
 *
 * @param    serviceClientDeviceConfigurationHandle    The handle created by a call to the create function.
 * @param    configurationId                         The configuration name (id) to retrieve Configuration info for.
 * @param    configuration                           Output parameter, if it is not NULL will contain the requested configuration info structure
 *
-* @return   A non-NULL char* containing device Configuration info upon success or NULL upon failure.
+* @return   IOTHUB_DEVICE_CONFIGURATION_RESULT upon success or an error code upon failure.
 */
 MOCKABLE_FUNCTION(, IOTHUB_DEVICE_CONFIGURATION_RESULT, IoTHubDeviceConfiguration_GetConfiguration, IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE, serviceClientDeviceConfigurationHandle, const char*, configurationId, IOTHUB_DEVICE_CONFIGURATION*, configuration);
 
@@ -140,7 +156,7 @@ MOCKABLE_FUNCTION(, IOTHUB_DEVICE_CONFIGURATION_RESULT, IoTHubDeviceConfiguratio
 *                                   the new configuration Id and other optional parameters
 * @param    configuration           Output parameter, if it is not NULL will contain the created configuration info structure
 *
-* @return   A non-NULL char* containing device Configuration info upon success or NULL upon failure.
+* @return   IOTHUB_DEVICE_CONFIGURATION_RESULT upon success or an error code upon failure.
 */
 MOCKABLE_FUNCTION(, IOTHUB_DEVICE_CONFIGURATION_RESULT, IoTHubDeviceConfiguration_AddConfiguration, IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE, serviceClientDeviceConfigurationHandle, const IOTHUB_DEVICE_CONFIGURATION_CREATE*, configurationCreate, IOTHUB_DEVICE_CONFIGURATION*, configuration);
 

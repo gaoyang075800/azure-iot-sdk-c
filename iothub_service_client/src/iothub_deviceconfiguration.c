@@ -21,8 +21,8 @@
 #include "iothub_sc_version.h"
 
 #define IOTHUB_DEVICECONFIGURATION_REQUEST_MODE_VALUES  \
-    IOTHUB_DEVICECONFIGURATION_REQUEST_GET,             \
-    IOTHUB_DEVICECONFIGURATION_REQUEST_GET_SINGLE,      \
+    IOTHUB_DEVICECONFIGURATION_REQUEST_GET_LIST,             \
+    IOTHUB_DEVICECONFIGURATION_REQUEST_GET,      \
     IOTHUB_DEVICECONFIGURATION_REQUEST_ADD,             \
     IOTHUB_DEVICECONFIGURATION_REQUEST_UPDATE,          \
     IOTHUB_DEVICECONFIGURATION_REQUEST_DELETE,          \
@@ -79,20 +79,20 @@ static const char* generateGuid(void)
 
 static STRING_HANDLE createRelativePath(IOTHUB_DEVICECONFIGURATION_REQUEST_MODE iotHubDeviceConfigurationRequestMode, const char* configurationId)
 {
-    //IOTHUB_DEVICECONFIGURATION_REQUEST_GET_SINGLE     GET      {iot hub}/configurations/{configuration id}          // Get single device configuration
+    //IOTHUB_DEVICECONFIGURATION_REQUEST_GET            GET      {iot hub}/configurations/{configuration id}          // Get single device configuration
     //IOTHUB_DEVICECONFIGURATION_REQUEST_ADD            PUT      {iot hub}/configurations/{configuration id}          // Add device configuration
     //IOTHUB_DEVICECONFIGURATION_REQUEST_UPDATE         PUT      {iot hub}/configurations/{configuration id}          // Update device configuration
     //IOTHUB_DEVICECONFIGURATION_REQUEST_DELETE         DELETE   {iot hub}/configurations/{configuration id}          // Delete device configuration
-    //IOTHUB_DEVICECONFIGURATION_REQUEST_GET            GET      {iot hub}/configurations                             // Get multiple configurations
+    //IOTHUB_DEVICECONFIGURATION_REQUEST_GET_LIST       GET      {iot hub}/configurations                             // Get multiple configurations
     //IOTHUB_DEVICECONFIGURATION_REQUEST_TESTQUERIES    POST     {iot hub}/configurations/testQueries                 // Test configuration queries
 
     STRING_HANDLE result;
 
-    if (iotHubDeviceConfigurationRequestMode == IOTHUB_DEVICECONFIGURATION_REQUEST_GET)
+    if (iotHubDeviceConfigurationRequestMode == IOTHUB_DEVICECONFIGURATION_REQUEST_GET_LIST)
     {
         result = STRING_construct_sprintf(RELATIVE_PATH_FMT_DEVICECONFIGURATIONS, URL_API_VERSION);
     }
-    else if ((iotHubDeviceConfigurationRequestMode == IOTHUB_DEVICECONFIGURATION_REQUEST_ADD) || (iotHubDeviceConfigurationRequestMode == IOTHUB_DEVICECONFIGURATION_REQUEST_UPDATE) || (iotHubDeviceConfigurationRequestMode == IOTHUB_DEVICECONFIGURATION_REQUEST_GET_SINGLE) || (iotHubDeviceConfigurationRequestMode == IOTHUB_DEVICECONFIGURATION_REQUEST_DELETE))
+    else if ((iotHubDeviceConfigurationRequestMode == IOTHUB_DEVICECONFIGURATION_REQUEST_ADD) || (iotHubDeviceConfigurationRequestMode == IOTHUB_DEVICECONFIGURATION_REQUEST_UPDATE) || (iotHubDeviceConfigurationRequestMode == IOTHUB_DEVICECONFIGURATION_REQUEST_GET) || (iotHubDeviceConfigurationRequestMode == IOTHUB_DEVICECONFIGURATION_REQUEST_DELETE))
     {
         result = STRING_construct_sprintf(RELATIVE_PATH_FMT_DEVICECONFIGURATION, configurationId, URL_API_VERSION);
     }
@@ -233,11 +233,11 @@ static IOTHUB_DEVICE_CONFIGURATION_RESULT sendHttpRequestDeviceConfiguration(IOT
         unsigned int statusCode = 0;
         unsigned char is_error = 0;
 
-        //IOTHUB_DEVICECONFIGURATION_REQUEST_GET_SINGLE     GET      {iot hub}/configurations/{configuration id}          // Get single device configuration
+        //IOTHUB_DEVICECONFIGURATION_REQUEST_GET            GET      {iot hub}/configurations/{configuration id}          // Get single device configuration
         //IOTHUB_DEVICECONFIGURATION_REQUEST_ADD            PUT      {iot hub}/configurations/{configuration id}          // Add device configuration
         //IOTHUB_DEVICECONFIGURATION_REQUEST_UPDATE         PUT      {iot hub}/configurations/{configuration id}          // Update device configuration
         //IOTHUB_DEVICECONFIGURATION_REQUEST_DELETE         DELETE   {iot hub}/configurations/{configuration id}          // Delete device configuration
-        //IOTHUB_DEVICECONFIGURATION_REQUEST_GET            GET      {iot hub}/configurations                             // Get multiple configurations
+        //IOTHUB_DEVICECONFIGURATION_REQUEST_GET_LIST       GET      {iot hub}/configurations                             // Get multiple configurations
         //IOTHUB_DEVICECONFIGURATION_REQUEST_TESTQUERIES    POST     {iot hub}/configurations/testQueries                 // Test configuration queries
 
         if ((iotHubDeviceConfigurationRequestMode == IOTHUB_DEVICECONFIGURATION_REQUEST_ADD) || (iotHubDeviceConfigurationRequestMode == IOTHUB_DEVICECONFIGURATION_REQUEST_UPDATE))
@@ -248,7 +248,7 @@ static IOTHUB_DEVICE_CONFIGURATION_RESULT sendHttpRequestDeviceConfiguration(IOT
         {
             httpApiRequestType = HTTPAPI_REQUEST_POST;
         }
-        else if ((iotHubDeviceConfigurationRequestMode == IOTHUB_DEVICECONFIGURATION_REQUEST_GET_SINGLE) || (iotHubDeviceConfigurationRequestMode == IOTHUB_DEVICECONFIGURATION_REQUEST_GET))
+        else if ((iotHubDeviceConfigurationRequestMode == IOTHUB_DEVICECONFIGURATION_REQUEST_GET) || (iotHubDeviceConfigurationRequestMode == IOTHUB_DEVICECONFIGURATION_REQUEST_GET_LIST))
         {
             httpApiRequestType = HTTPAPI_REQUEST_GET;
         }
@@ -410,6 +410,15 @@ void IoTHubDeviceConfiguration_Destroy(IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATIO
         /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_17: [ If the serviceClientDeviceConfigurationHandle input parameter is not NULL IoTHubDeviceConfiguration_Destroy shall free the memory of it and return ]*/
         free_deviceConfiguration_handle((IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION*)serviceClientDeviceConfigurationHandle);
     }
+}
+
+IOTHUB_DEVICE_CONFIGURATION_RESULT IoTHubDeviceConfiguration_GetConfigurations(IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE serviceClientDeviceConfigurationHandle, const int maxConfigurationsCount, IOTHUB_DEVICE_CONFIGURATIONS_RESULT* configurations)
+{
+    (void)serviceClientDeviceConfigurationHandle;
+    (void)maxConfigurationsCount;
+    (void)configurations;
+
+    return IOTHUB_DEVICE_CONFIGURATION_OK;
 }
 
 IOTHUB_DEVICE_CONFIGURATION_RESULT IoTHubDeviceConfiguration_GetConfiguration(IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE serviceClientDeviceConfigurationHandle, const char* configurationId, IOTHUB_DEVICE_CONFIGURATION* configuration)
