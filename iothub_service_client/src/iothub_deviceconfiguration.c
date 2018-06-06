@@ -25,7 +25,8 @@
     IOTHUB_DEVICECONFIGURATION_REQUEST_GET_SINGLE,      \
     IOTHUB_DEVICECONFIGURATION_REQUEST_ADD,             \
     IOTHUB_DEVICECONFIGURATION_REQUEST_UPDATE,          \
-    IOTHUB_DEVICECONFIGURATION_REQUEST_DELETE          
+    IOTHUB_DEVICECONFIGURATION_REQUEST_DELETE,          \
+    IOTHUB_DEVICECONFIGURATION_REQUEST_TESTQUERIES
 
 DEFINE_ENUM(IOTHUB_DEVICECONFIGURATION_REQUEST_MODE, IOTHUB_DEVICECONFIGURATION_REQUEST_MODE_VALUES);
 DEFINE_ENUM_STRINGS(IOTHUB_DEVICE_CONFIGURATION_RESULT, IOTHUB_DEVICE_CONFIGURATION_RESULT_VALUES);
@@ -47,8 +48,11 @@ static const char* const URL_API_VERSION = "api-version=2018-03-01-preview";
 
 static const char* const RELATIVE_PATH_FMT_DEVICECONFIGURATION = "/configurations/%s?%s";
 static const char* const RELATIVE_PATH_FMT_DEVICECONFIGURATIONS = "/configurations/?top=%s&%s";
-static const char* const RELATIVE_PATH_FMT_APPLY_DEVICECONFIGURATION = "/devices/%s/applyConfigurationContent?";
+static const char* const RELATIVE_PATH_FMT_DEVICECONFIGURATION_TESTQUERIES = "/configurationstestQueries?%s";
 static const char* const RELATIVE_PATH_FMT_DEVICECONFIGURATION_PAYLOAD = "{\"methodName\":\"%s\",\"timeout\":%d,\"payload\":%s}";
+
+//TODO: add this to devices API
+//static const char* const RELATIVE_PATH_FMT_APPLY_DEVICECONFIGURATION = "/devices/%s/applyConfigurationContent?";
 
 typedef struct IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_TAG
 {
@@ -56,6 +60,254 @@ typedef struct IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_TAG
     char* sharedAccessKey;
     char* keyName;
 } IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION;
+
+static const char* generateGuid(void)
+{
+    char* result;
+
+    if ((result = malloc(UID_LENGTH)) != NULL)
+    {
+        result[0] = '\0';
+        if (UniqueId_Generate(result, UID_LENGTH) != UNIQUEID_OK)
+        {
+            free((void*)result);
+            result = NULL;
+        }
+    }
+    return (const char*)result;
+}
+
+static STRING_HANDLE createRelativePath(IOTHUB_DEVICECONFIGURATION_REQUEST_MODE iotHubDeviceConfigurationRequestMode, const char* configurationId)
+{
+    //IOTHUB_DEVICECONFIGURATION_REQUEST_GET_SINGLE     GET      {iot hub}/configurations/{configuration id}          // Get single device configuration
+    //IOTHUB_DEVICECONFIGURATION_REQUEST_ADD            PUT      {iot hub}/configurations/{configuration id}          // Add device configuration
+    //IOTHUB_DEVICECONFIGURATION_REQUEST_UPDATE         PUT      {iot hub}/configurations/{configuration id}          // Update device configuration
+    //IOTHUB_DEVICECONFIGURATION_REQUEST_DELETE         DELETE   {iot hub}/configurations/{configuration id}          // Delete device configuration
+    //IOTHUB_DEVICECONFIGURATION_REQUEST_GET            GET      {iot hub}/configurations                             // Get multiple configurations
+    //IOTHUB_DEVICECONFIGURATION_REQUEST_TESTQUERIES    POST     {iot hub}/configurations/testQueries                 // Test configuration queries
+
+    STRING_HANDLE result;
+
+    if (iotHubDeviceConfigurationRequestMode == IOTHUB_DEVICECONFIGURATION_REQUEST_GET)
+    {
+        result = STRING_construct_sprintf(RELATIVE_PATH_FMT_DEVICECONFIGURATIONS, URL_API_VERSION);
+    }
+    else if ((iotHubDeviceConfigurationRequestMode == IOTHUB_DEVICECONFIGURATION_REQUEST_ADD) || (iotHubDeviceConfigurationRequestMode == IOTHUB_DEVICECONFIGURATION_REQUEST_UPDATE) || (iotHubDeviceConfigurationRequestMode == IOTHUB_DEVICECONFIGURATION_REQUEST_GET_SINGLE) || (iotHubDeviceConfigurationRequestMode == IOTHUB_DEVICECONFIGURATION_REQUEST_DELETE))
+    {
+        result = STRING_construct_sprintf(RELATIVE_PATH_FMT_DEVICECONFIGURATION, configurationId, URL_API_VERSION);
+    }
+    else if (iotHubDeviceConfigurationRequestMode == IOTHUB_DEVICECONFIGURATION_REQUEST_TESTQUERIES)
+    {
+        result = STRING_construct_sprintf(RELATIVE_PATH_FMT_DEVICECONFIGURATION_TESTQUERIES, URL_API_VERSION);
+    }
+    else
+    {
+        result = NULL;
+    }
+    return result;
+}
+
+static HTTP_HEADERS_HANDLE createHttpHeader(IOTHUB_DEVICECONFIGURATION_REQUEST_MODE iotHubDeviceConfigurationRequestMode)
+{
+    /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_020: [ IoTHubDeviceConfiguration_GetConfiguration shall add the following headers to the created HTTP GET request: authorization=sasToken,Request-Id=1001,Accept=application/json,Content-Type=application/json,charset=utf-8 ]*/
+    HTTP_HEADERS_HANDLE httpHeader;
+    const char* guid = NULL;
+
+    if ((httpHeader = HTTPHeaders_Alloc()) == NULL)
+    {
+        LogError("HTTPHeaders_Alloc failed");
+    }
+    else if (HTTPHeaders_AddHeaderNameValuePair(httpHeader, HTTP_HEADER_KEY_AUTHORIZATION, HTTP_HEADER_VAL_AUTHORIZATION) != HTTP_HEADERS_OK)
+    {
+        LogError("HTTPHeaders_AddHeaderNameValuePair failed for Authorization header");
+        HTTPHeaders_Free(httpHeader);
+        httpHeader = NULL;
+    }
+    else if ((guid = generateGuid()) == NULL)
+    {
+        LogError("GUID creation failed");
+        HTTPHeaders_Free(httpHeader);
+        httpHeader = NULL;
+    }
+    else if (HTTPHeaders_AddHeaderNameValuePair(httpHeader, HTTP_HEADER_KEY_REQUEST_ID, guid) != HTTP_HEADERS_OK)
+    {
+        LogError("HTTPHeaders_AddHeaderNameValuePair failed for RequestId header");
+        HTTPHeaders_Free(httpHeader);
+        httpHeader = NULL;
+    }
+    else if (HTTPHeaders_AddHeaderNameValuePair(httpHeader, HTTP_HEADER_KEY_USER_AGENT, HTTP_HEADER_VAL_USER_AGENT) != HTTP_HEADERS_OK)
+    {
+        LogError("HTTPHeaders_AddHeaderNameValuePair failed for User-Agent header");
+        HTTPHeaders_Free(httpHeader);
+        httpHeader = NULL;
+    }
+    else if (HTTPHeaders_AddHeaderNameValuePair(httpHeader, HTTP_HEADER_KEY_CONTENT_TYPE, HTTP_HEADER_VAL_CONTENT_TYPE) != HTTP_HEADERS_OK)
+    {
+        LogError("HTTPHeaders_AddHeaderNameValuePair failed for Content-Type header");
+        HTTPHeaders_Free(httpHeader);
+        httpHeader = NULL;
+    }
+    else if ((iotHubDeviceConfigurationRequestMode == IOTHUB_DEVICECONFIGURATION_REQUEST_ADD) || (iotHubDeviceConfigurationRequestMode == IOTHUB_DEVICECONFIGURATION_REQUEST_UPDATE) || (iotHubDeviceConfigurationRequestMode != IOTHUB_DEVICECONFIGURATION_REQUEST_DELETE))
+    {
+        if (HTTPHeaders_AddHeaderNameValuePair(httpHeader, HTTP_HEADER_KEY_IFMATCH, HTTP_HEADER_VAL_IFMATCH) != HTTP_HEADERS_OK)
+        {
+            LogError("HTTPHeaders_AddHeaderNameValuePair failed for If-Match header");
+            HTTPHeaders_Free(httpHeader);
+            httpHeader = NULL;
+        }
+    }
+    free((void*)guid);
+
+    return httpHeader;
+}
+
+static IOTHUB_DEVICE_CONFIGURATION_RESULT sendHttpRequestDeviceConfiguration(IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE serviceClientDeviceConfigurationHandle, IOTHUB_DEVICECONFIGURATION_REQUEST_MODE iotHubDeviceConfigurationRequestMode, const char* configurationId, BUFFER_HANDLE deviceJsonBuffer, BUFFER_HANDLE responseBuffer)
+{
+    IOTHUB_DEVICE_CONFIGURATION_RESULT result;
+
+    STRING_HANDLE uriResource = NULL;
+    STRING_HANDLE accessKey = NULL;
+    STRING_HANDLE keyName = NULL;
+    HTTPAPIEX_SAS_HANDLE httpExApiSasHandle;
+    HTTPAPIEX_HANDLE httpExApiHandle;
+    HTTP_HEADERS_HANDLE httpHeader;
+
+    if ((uriResource = STRING_construct(serviceClientDeviceConfigurationHandle->hostname)) == NULL)
+    {
+        /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_024: [ If any of the HTTPAPI call fails IoTHubDeviceConfiguration_GetConfiguration shall fail and return NULL ]*/
+        LogError("STRING_construct failed for uriResource");
+        result = IOTHUB_DEVICE_CONFIGURATION_ERROR;
+    }
+    else if ((accessKey = STRING_construct(serviceClientDeviceConfigurationHandle->sharedAccessKey)) == NULL)
+    {
+        /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_024: [ If any of the call fails during the HTTP creation IoTHubDeviceConfiguration_GetConfiguration shall fail and return NULL ]*/
+        LogError("STRING_construct failed for accessKey");
+        STRING_delete(uriResource);
+        result = IOTHUB_DEVICE_CONFIGURATION_ERROR;
+    }
+    else if ((keyName = STRING_construct(serviceClientDeviceConfigurationHandle->keyName)) == NULL)
+    {
+        /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_024: [ If any of the call fails during the HTTP creation IoTHubDeviceConfiguration_GetConfiguration shall fail and return NULL ]*/
+        LogError("STRING_construct failed for keyName");
+        STRING_delete(accessKey);
+        STRING_delete(uriResource);
+        result = IOTHUB_DEVICE_CONFIGURATION_ERROR;
+    }
+    /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_020: [ IoTHubDeviceConfiguration_GetConfiguration shall add the following headers to the created HTTP GET request: authorization=sasToken,Request-Id=1001,Accept=application/json,Content-Type=application/json,charset=utf-8 ]*/
+    else if ((httpHeader = createHttpHeader(iotHubDeviceConfigurationRequestMode)) == NULL)
+    {
+        /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_024: [ If any of the call fails during the HTTP creation IoTHubDeviceConfiguration_GetConfiguration shall fail and return NULL ]*/
+        LogError("HttpHeader creation failed");
+        STRING_delete(keyName);
+        STRING_delete(accessKey);
+        STRING_delete(uriResource);
+        result = IOTHUB_DEVICE_CONFIGURATION_ERROR;
+    }
+    /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_021: [ IoTHubDeviceConfiguration_GetConfiguration shall create an HTTPAPIEX_SAS_HANDLE handle by calling HTTPAPIEX_SAS_Create ]*/
+    else if ((httpExApiSasHandle = HTTPAPIEX_SAS_Create(accessKey, uriResource, keyName)) == NULL)
+    {
+        /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_025: [ If any of the HTTPAPI call fails IoTHubDeviceConfiguration_GetConfiguration shall fail and return IOTHUB_DEVICE_CONFIGURATION_HTTPAPI_ERROR ]*/
+        LogError("HTTPAPIEX_SAS_Create failed");
+        HTTPHeaders_Free(httpHeader);
+        STRING_delete(keyName);
+        STRING_delete(accessKey);
+        STRING_delete(uriResource);
+        result = IOTHUB_DEVICE_CONFIGURATION_HTTPAPI_ERROR;
+    }
+    /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_022: [ IoTHubDeviceConfiguration_GetConfiguration shall create an HTTPAPIEX_HANDLE handle by calling HTTPAPIEX_Create ]*/
+    else if ((httpExApiHandle = HTTPAPIEX_Create(serviceClientDeviceConfigurationHandle->hostname)) == NULL)
+    {
+        /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_025: [ If any of the HTTPAPI call fails IoTHubDeviceConfiguration_GetConfiguration shall fail and return NULL ]*/
+        LogError("HTTPAPIEX_Create failed");
+        HTTPAPIEX_SAS_Destroy(httpExApiSasHandle);
+        HTTPHeaders_Free(httpHeader);
+        STRING_delete(keyName);
+        STRING_delete(accessKey);
+        STRING_delete(uriResource);
+        result = IOTHUB_DEVICE_CONFIGURATION_HTTPAPI_ERROR;
+    }
+    else
+    {
+        HTTPAPI_REQUEST_TYPE httpApiRequestType = HTTPAPI_REQUEST_GET;
+        STRING_HANDLE relativePath;
+        unsigned int statusCode = 0;
+        unsigned char is_error = 0;
+
+        //IOTHUB_DEVICECONFIGURATION_REQUEST_GET_SINGLE     GET      {iot hub}/configurations/{configuration id}          // Get single device configuration
+        //IOTHUB_DEVICECONFIGURATION_REQUEST_ADD            PUT      {iot hub}/configurations/{configuration id}          // Add device configuration
+        //IOTHUB_DEVICECONFIGURATION_REQUEST_UPDATE         PUT      {iot hub}/configurations/{configuration id}          // Update device configuration
+        //IOTHUB_DEVICECONFIGURATION_REQUEST_DELETE         DELETE   {iot hub}/configurations/{configuration id}          // Delete device configuration
+        //IOTHUB_DEVICECONFIGURATION_REQUEST_GET            GET      {iot hub}/configurations                             // Get multiple configurations
+        //IOTHUB_DEVICECONFIGURATION_REQUEST_TESTQUERIES    POST     {iot hub}/configurations/testQueries                 // Test configuration queries
+
+        if ((iotHubDeviceConfigurationRequestMode == IOTHUB_DEVICECONFIGURATION_REQUEST_ADD) || (iotHubDeviceConfigurationRequestMode == IOTHUB_DEVICECONFIGURATION_REQUEST_UPDATE))
+        {
+            httpApiRequestType = HTTPAPI_REQUEST_PUT;
+        }
+        else if ((iotHubDeviceConfigurationRequestMode == IOTHUB_DEVICECONFIGURATION_REQUEST_TESTQUERIES))
+        {
+            httpApiRequestType = HTTPAPI_REQUEST_POST;
+        }
+        else if ((iotHubDeviceConfigurationRequestMode == IOTHUB_DEVICECONFIGURATION_REQUEST_GET_SINGLE) || (iotHubDeviceConfigurationRequestMode == IOTHUB_DEVICECONFIGURATION_REQUEST_GET))
+        {
+            httpApiRequestType = HTTPAPI_REQUEST_GET;
+        }
+        else if ((iotHubDeviceConfigurationRequestMode == IOTHUB_DEVICECONFIGURATION_REQUEST_DELETE))
+        {
+            httpApiRequestType = HTTPAPI_REQUEST_DELETE;
+        }
+        else
+        {
+            is_error = 1;
+        }
+
+        if (is_error)
+        {
+            LogError("Invalid request type");
+            result = IOTHUB_DEVICE_CONFIGURATION_HTTPAPI_ERROR;
+        }
+        else
+        {
+            /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_019: [ IoTHubDeviceConfiguration_GetConfiguration shall create HTTP GET request URL using the given deviceId using the following format: url/configurations/[deviceId] ]*/
+            if ((relativePath = createRelativePath(iotHubDeviceConfigurationRequestMode, configurationId)) == NULL)
+            {
+                /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_024: [ If any of the call fails during the HTTP creation IoTHubDeviceConfiguration_GetConfiguration shall fail and return NULL ]*/
+                LogError("Failure creating relative path");
+                result = IOTHUB_DEVICE_CONFIGURATION_ERROR;
+            }
+            /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_023: [ IoTHubDeviceConfiguration_GetConfiguration shall execute the HTTP GET request by calling HTTPAPIEX_ExecuteRequest ]*/
+            else if (HTTPAPIEX_SAS_ExecuteRequest(httpExApiSasHandle, httpExApiHandle, httpApiRequestType, STRING_c_str(relativePath), httpHeader, deviceJsonBuffer, &statusCode, NULL, responseBuffer) != HTTPAPIEX_OK)
+            {
+                /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_025: [ If any of the HTTPAPI call fails IoTHubDeviceConfiguration_GetConfiguration shall fail and return NULL ]*/
+                LogError("HTTPAPIEX_SAS_ExecuteRequest failed");
+                STRING_delete(relativePath);
+                result = IOTHUB_DEVICE_CONFIGURATION_HTTPAPI_ERROR;
+            }
+            else
+            {
+                STRING_delete(relativePath);
+                if (statusCode == 200)
+                {
+                    /*CodesSRS_IOTHUBDEVICECONFIGURATION_01_030: [ Otherwise IoTHubDeviceConfiguration_GetConfiguration shall save the received deviceConfiguration to the out parameter and return with it ]*/
+                    result = IOTHUB_DEVICE_CONFIGURATION_OK;
+                }
+                else
+                {
+                    /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_026: [ IoTHubDeviceConfiguration_GetConfiguration shall verify the received HTTP status code and if it is not equal to 200 then return NULL ]*/
+                    LogError("Http Failure status code %d.", statusCode);
+                    result = IOTHUB_DEVICE_CONFIGURATION_ERROR;
+                }
+            }
+        }
+        HTTPAPIEX_Destroy(httpExApiHandle);
+        HTTPAPIEX_SAS_Destroy(httpExApiSasHandle);
+        HTTPHeaders_Free(httpHeader);
+        STRING_delete(keyName);
+        STRING_delete(accessKey);
+        STRING_delete(uriResource);
+    }
+    return result;
+}
 
 static void free_deviceConfiguration_handle(IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION* deviceConfiguration)
 {
@@ -70,7 +322,7 @@ IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE IoTHubDeviceConfiguration_Crea
     IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE result;
 
     /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_001: [ If the serviceClientHandle input parameter is NULL IoTHubDeviceConfiguration_Create shall return NULL ]*/
-    if(serviceClientHandle == NULL)
+    if (serviceClientHandle == NULL)
     {
         LogError("IotHubDeviceConfiguration_Create: serviceClientHandle is null");
         result = NULL;
@@ -170,7 +422,7 @@ IOTHUB_DEVICE_CONFIGURATION_RESULT IoTHubDeviceConfiguration_GetConfiguration(IO
         LogError("Input parameter cannot be NULL");
         result = IOTHUB_DEVICE_CONFIGURATION_INVALID_ARG;
     }
-    
+
     (void)configuration;
 
     return result;
@@ -198,6 +450,6 @@ IOTHUB_DEVICE_CONFIGURATION_RESULT IoTHubDeviceConfiguration_DeleteConfiguration
 {
     (void)serviceClientDeviceConfigurationHandle;
     (void)configurationId;
-    
+
     return IOTHUB_DEVICE_CONFIGURATION_OK;
 }
