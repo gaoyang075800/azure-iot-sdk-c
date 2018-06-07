@@ -58,7 +58,7 @@ static const char* const CONFIGURATION_JSON_KEY_METRICS = "metrics";
 static const char* const CONFIGURATION_JSON_KEY_RESULTS = "results";
 static const char* const CONFIGURATION_JSON_KEY_QUERIES = "queries";
 static const char* const CONFIGURATION_JSON_KEY_ETAG = "etag";
-static const char* const CONFIGURATION_DEVICE_CONTENT_PAYLOAD = "{\"properties.desired.%s\":\"%s\",\"timeout\":%d,\"payload\":%s}";
+static const char* const CONFIGURATION_CONTENT_PAYLOAD = "{\"deviceContent\": \"%s\", \"modulesContent\": \"%s\"}";
 
 static const char* const URL_API_VERSION = "api-version=2018-03-01-preview";
 
@@ -66,7 +66,7 @@ static const char* const RELATIVE_PATH_FMT_DEVICECONFIGURATION = "/configuration
 static const char* const RELATIVE_PATH_FMT_DEVICECONFIGURATIONS = "/configurations/?top=%s&%s";
 static const char* const RELATIVE_PATH_FMT_DEVICECONFIGURATION_TESTQUERIES = "/configurationstestQueries?%s";
 
-
+static const char* const CONFIGURATION_DEFAULT_CONTENT_TYPE = "assignment";
 
 //TODO: add this to devices API
 //static const char* const RELATIVE_PATH_FMT_APPLY_DEVICECONFIGURATION = "/devices/%s/applyConfigurationContent?";
@@ -326,6 +326,31 @@ static IOTHUB_DEVICE_CONFIGURATION_RESULT sendHttpRequestDeviceConfiguration(IOT
     return result;
 }
 
+static BUFFER_HANDLE createConfigurationContentPayloadJson(IOTHUB_DEVICE_CONFIGURATION_CONTENT configurationContent)
+{
+    STRING_HANDLE stringHandle;
+    const char* stringHandle_c_str;
+    BUFFER_HANDLE result;
+
+    if ((stringHandle = STRING_construct_sprintf(CONFIGURATION_CONTENT_PAYLOAD, configurationContent.deviceContent, configurationContent.modulesContent)) == NULL)
+    {
+        LogError("STRING_construct_sprintf failed");
+        result = NULL;
+    }
+    else if ((stringHandle_c_str = STRING_c_str(stringHandle)) == NULL)
+    {
+        LogError("STRING_c_str failed");
+        STRING_delete(stringHandle);
+        result = NULL;
+    }
+    else
+    {
+        result = BUFFER_create((const unsigned char*)stringHandle_c_str, strlen(stringHandle_c_str));
+        STRING_delete(stringHandle);
+    }
+    return result;
+}
+
 static IOTHUB_DEVICE_CONFIGURATION_RESULT parseDeviceConfigurationJsonObject(JSON_Object* root_object, IOTHUB_DEVICE_CONFIGURATION* configuration)
 {
     IOTHUB_DEVICE_CONFIGURATION_RESULT result = IOTHUB_DEVICE_CONFIGURATION_ERROR;
@@ -333,8 +358,8 @@ static IOTHUB_DEVICE_CONFIGURATION_RESULT parseDeviceConfigurationJsonObject(JSO
     const char* configurationId = json_object_get_string(root_object, CONFIGURATION_JSON_KEY_CONFIGURATION_ID);
     const char* schemaVersion = json_object_get_string(root_object, CONFIGURATION_JSON_KEY_SCHEMA_VERSION);
     const char* content = json_object_get_string(root_object, CONFIGURATION_JSON_KEY_CONTENT);
-    const char* deviceContent = json_object_get_string(root_object, CONFIGURATION_JSON_KEY_DEVICE_CONTENT);
-    const char* modulesContent = json_object_get_string(root_object, CONFIGURATION_JSON_KEY_MODULES_CONTENT);
+    /*const char* deviceContent = json_object_get_string(root_object, CONFIGURATION_JSON_KEY_DEVICE_CONTENT);
+    const char* modulesContent = json_object_get_string(root_object, CONFIGURATION_JSON_KEY_MODULES_CONTENT);*/
     const char* contentType = json_object_get_string(root_object, CONFIGURATION_JSON_KEY_CONTENT_TYPE);
     const char* targetCondition = json_object_get_string(root_object, CONFIGURATION_JSON_KEY_TARGET_CONDITION);
     const char* createdTime = json_object_get_string(root_object, CONFIGURATION_JSON_KEY_CREATED_TIME);
@@ -349,8 +374,6 @@ static IOTHUB_DEVICE_CONFIGURATION_RESULT parseDeviceConfigurationJsonObject(JSO
     (void)metrics;
     (void)results;
     (void)queries;
-    (void)deviceContent;
-    (void)modulesContent;
     (void)content;
 
     if ((configurationId != NULL) && (mallocAndStrcpy_s((char**)&(configuration->configurationId), configurationId) != 0))

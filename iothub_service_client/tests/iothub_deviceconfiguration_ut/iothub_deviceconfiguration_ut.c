@@ -208,8 +208,21 @@ static const char* TEST_STRING_VALUE = "Test string value";
 static const char* TEST_CONST_CHAR_PTR = "TestConstChar";
 static char* TEST_CHAR_PTR = "TestString";
 
-static const char* TEST_CONFIGURATION_ID = "theConfigurationId";
-static const char* TEST_ETAG = "theEtag";
+static const char* TEST_CONFIGURATION_ID = "theid";
+static const char* TEST_SCHEMA_VERSION = "theschemaVersion";
+static const char* TEST_CONTENT = "thecontent";
+static const char* TEST_DEVICE_CONTENT = "thedeviceContent";
+static const char* TEST_MODULES_CONTENT = "themodulesContent";
+static const char* TEST_CONTENT_TYPE = "thecontentType";
+static const char* TEST_TARGET_CONDITION = "thetargetCondition";
+static const char* TEST_CREATED_TIME = "thecreatedTimeUtc";
+static const char* TEST_LAST_UPDATED_TIME = "thelastUpdatedTimeUtc";
+static const char* TEST_PRIORITY = "thepriority";
+static const char* TEST_METRICS = "themetrics";
+static const char* TEST_RESULTS = "theresults";
+static const char* TEST_QUERIES = "thequeries";
+static const char* TEST_ETAG = "theetag";
+static const char* TEST_CONFIGURATION_DEVICE_CONTENT_PAYLOAD = "{\"properties.desired.%s\":\"%s\",\"timeout\":%d,\"payload\":%s}";
 
 static char* TEST_HOSTNAME = "theHostName";
 static char* TEST_IOTHUBNAME = "theIotHubName";
@@ -222,8 +235,20 @@ static const HTTP_HEADERS_HANDLE TEST_HTTP_HEADERS_HANDLE = (HTTP_HEADERS_HANDLE
 static const unsigned int httpStatusCodeOk = 200;
 static const unsigned int httpStatusCodeBadRequest = 400;
 
-static const char* TEST_DEVICE_JSON_KEY_CONFIGURATION_ID = "id";
-static const char* TEST_DEVICE_JSON_KEY_SCHEMA_VERSION = "schemaVersion";
+static const char* TEST_CONFIGURATION_JSON_KEY_CONFIGURATION_ID = "id";
+static const char* TEST_CONFIGURATION_JSON_KEY_SCHEMA_VERSION = "schemaVersion";
+static const char* TEST_CONFIGURATION_JSON_KEY_CONTENT = "content";
+static const char* TEST_CONFIGURATION_JSON_KEY_DEVICE_CONTENT = "deviceContent";
+static const char* TEST_CONFIGURATION_JSON_KEY_MODULES_CONTENT = "modulesContent";
+static const char* TEST_CONFIGURATION_JSON_KEY_CONTENT_TYPE = "contentType";
+static const char* TEST_CONFIGURATION_JSON_KEY_TARGET_CONDITION = "targetCondition";
+static const char* TEST_CONFIGURATION_JSON_KEY_CREATED_TIME = "createdTimeUtc";
+static const char* TEST_CONFIGURATION_JSON_KEY_LAST_UPDATED_TIME = "lastUpdatedTimeUtc";
+static const char* TEST_CONFIGURATION_JSON_KEY_PRIORITY = "priority";
+static const char* TEST_CONFIGURATION_JSON_KEY_METRICS = "metrics";
+static const char* TEST_CONFIGURATION_JSON_KEY_RESULTS = "results";
+static const char* TEST_CONFIGURATION_JSON_KEY_QUERIES = "queries";
+static const char* TEST_CONFIGURATION_JSON_KEY_ETAG = "etag";
 
 static const char* TEST_LASTACTIVITYTIME = "0001-01-01T33:33:33";
 
@@ -710,8 +735,38 @@ static void set_expected_calls_for_GetConfiguration_processing()
     STRICT_EXPECTED_CALL(json_value_get_object(TEST_JSON_VALUE))
         .SetReturn(TEST_JSON_OBJECT);
 
+    /*STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_CONFIGURATION_JSON_KEY_CONFIGURATION_ID))
+        .SetReturn(TEST_CONFIGURATION_ID);
+
+    STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_CONFIGURATION_JSON_KEY_SCHEMA_VERSION))
+        .SetReturn(TEST_CONFIGURATION_ID);
+
+    STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_CONFIGURATION_JSON_KEY_CONTENT))
+        .SetReturn(TEST_CONFIGURATION_ID);
+
     STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_CONFIGURATION_ID))
         .SetReturn(TEST_CONFIGURATION_ID);
+
+    STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_CONFIGURATION_ID))
+        .SetReturn(TEST_CONFIGURATION_ID);
+
+    STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_CONFIGURATION_ID))
+        .SetReturn(TEST_CONFIGURATION_ID);
+
+    STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_CONFIGURATION_ID))
+        .SetReturn(TEST_CONFIGURATION_ID);
+
+    STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_CONFIGURATION_ID))
+        .SetReturn(TEST_CONFIGURATION_ID);
+
+    STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_CONFIGURATION_ID))
+        .SetReturn(TEST_CONFIGURATION_ID);
+
+    STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_CONFIGURATION_ID))
+        .SetReturn(TEST_CONFIGURATION_ID);
+
+    STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_CONFIGURATION_ID))
+        .SetReturn(TEST_CONFIGURATION_ID);*/
     
     //[json_object_get_string(0000000000005151, "id")][json_object_get_string(0000000000005151, "schemaVersion")][json_object_get_string(0000000000005151, "content")][json_object_get_string(0000000000005151, "deviceContent")][json_object_get_string(0000000000005151, "modulesContent")][json_object_get_string(0000000000005151, "contentType")][json_object_get_string(0000000000005151, "targetCondition")][json_object_get_string(0000000000005151, "createdTimeUtc")][json_object_get_string(0000000000005151, "lastUpdatedTimeUtc")][json_object_get_string(0000000000005151, "priority")][json_object_get_string(0000000000005151, "metrics")][json_object_get_string(0000000000005151, "results")][json_object_get_string(0000000000005151, "queries")][json_object_get_string(0000000000005151, "etag")][mallocAndStrcpy_s(000001D65627BDE0, "TestConstChar")][mallocAndStrcpy_s(000001D65627BDD8, "TestConstChar")]
 
