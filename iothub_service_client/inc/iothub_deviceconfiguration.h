@@ -56,12 +56,6 @@ typedef struct IOTHUB_DEVICE_CONFIGURATION_LABEL_TAG
     const char** labelValue;
 } IOTHUB_DEVICE_CONFIGURATION_LABELS;
 
-typedef struct IOTHUB_DEVICE_CONFIGURATIONS_RESULTS_TAG
-{
-    const long numConfigurations;
-    const char** configurations;
-} IOTHUB_DEVICE_CONFIGURATIONS_RESULT;
-
 #define IOTHUB_DEVICE_CONFIGURATION_SCHEMA_VERSION_1 "1.0"
 #define IOTHUB_DEVICE_CONFIGURATION_CONTENT_VERSION_1 1
 typedef struct IOTHUB_DEVICE_CONFIGURATION_TAG
@@ -80,11 +74,11 @@ typedef struct IOTHUB_DEVICE_CONFIGURATION_TAG
     const char* createdTimeUtc;
     const char* lastUpdatedTimeUtc;
 
-    IOTHUB_DEVICE_CONFIGURATION_METRICS_RESULT metricResult;                      //version 1+
     IOTHUB_DEVICE_CONFIGURATION_METRICS_RESULT systemMetricsResult;               //version 1+
-
-    IOTHUB_DEVICE_CONFIGURATION_METRICS_DEFINITION metricsDefinition;             //version 1+
     IOTHUB_DEVICE_CONFIGURATION_METRICS_DEFINITION systemMetricsDefinition;       //version 1+
+
+    IOTHUB_DEVICE_CONFIGURATION_METRICS_RESULT metricResult;                      //version 1+
+    IOTHUB_DEVICE_CONFIGURATION_METRICS_DEFINITION metricsDefinition;             //version 1+
 } IOTHUB_DEVICE_CONFIGURATION;
 
 #define IOTHUB_DEVICE_CONFIGURATION_CREATE_VERSION_1 1

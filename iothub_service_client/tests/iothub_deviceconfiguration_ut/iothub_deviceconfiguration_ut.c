@@ -58,16 +58,25 @@ static int my_mallocAndStrcpy_s(char** destination, const char* source)
 #include "parson.h"
 
 MOCKABLE_FUNCTION(, JSON_Value*, json_parse_string, const char *, string);
+MOCKABLE_FUNCTION(, const char*, json_object_get_string, const JSON_Object *, object, const char *, name);
 MOCKABLE_FUNCTION(, JSON_Object*, json_value_get_object, const JSON_Value *, value);
-MOCKABLE_FUNCTION(, JSON_Value*, json_object_get_value, const JSON_Object *, object, const char *, name);
-MOCKABLE_FUNCTION(, const char*, json_object_get_string, const JSON_Object*, object, const char *, name);
-MOCKABLE_FUNCTION(, const char*, json_value_get_string, const JSON_Value*, value);
-MOCKABLE_FUNCTION(, double, json_value_get_number, const JSON_Value*, value);
-MOCKABLE_FUNCTION(, JSON_Value_Type, json_value_get_type, const JSON_Value*, value);
-
+MOCKABLE_FUNCTION(, double, json_object_get_number, const JSON_Object*, object, const char*, name);
+MOCKABLE_FUNCTION(, char*, json_serialize_to_string, const JSON_Value*, value);
+MOCKABLE_FUNCTION(, void, json_free_serialized_string, char*, string);
+MOCKABLE_FUNCTION(, const char*, json_object_dotget_string, const JSON_Object*, object, const char*, name);
+MOCKABLE_FUNCTION(, JSON_Status, json_object_set_string, JSON_Object*, object, const char*, name, const char*, string);
+MOCKABLE_FUNCTION(, JSON_Status, json_object_dotset_string, JSON_Object*, object, const char*, name, const char*, string);
+MOCKABLE_FUNCTION(, JSON_Value*, json_value_init_object);
+MOCKABLE_FUNCTION(, JSON_Array*, json_array_get_array, const JSON_Array*, array, size_t, index);
+MOCKABLE_FUNCTION(, JSON_Object*, json_array_get_object, const JSON_Array*, array, size_t, index);
+MOCKABLE_FUNCTION(, JSON_Array*, json_value_get_array, const JSON_Value*, value);
+MOCKABLE_FUNCTION(, size_t, json_array_get_count, const JSON_Array*, array);
+MOCKABLE_FUNCTION(, JSON_Status, json_array_clear, JSON_Array*, array);
 MOCKABLE_FUNCTION(, JSON_Status, json_object_clear, JSON_Object*, object);
 MOCKABLE_FUNCTION(, void, json_value_free, JSON_Value *, value);
-MOCKABLE_FUNCTION(, char*, json_serialize_to_string, const JSON_Value*, value);
+MOCKABLE_FUNCTION(, JSON_Status, json_object_dotset_boolean, JSON_Object*, object, const char *, name, int, boolean);
+MOCKABLE_FUNCTION(, int, json_object_dotget_boolean, const JSON_Object *, object, const char *, name);
+MOCKABLE_FUNCTION(, JSON_Object*, json_object_dotget_object, const JSON_Object *, object, const char *, name);
 
 #undef ENABLE_MOCKS
 
@@ -378,28 +387,56 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
     REGISTER_GLOBAL_MOCK_RETURN(HTTPAPIEX_SAS_ExecuteRequest, HTTPAPIEX_OK);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(HTTPAPIEX_SAS_ExecuteRequest, HTTPAPIEX_ERROR);
 
-    REGISTER_GLOBAL_MOCK_HOOK(json_parse_string, my_json_parse_string);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_parse_string, NULL);
-
-    REGISTER_GLOBAL_MOCK_HOOK(json_value_free, my_json_value_free);
+    REGISTER_GLOBAL_MOCK_RETURN(json_value_init_object, TEST_JSON_VALUE);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_value_init_object, NULL);
 
     REGISTER_GLOBAL_MOCK_RETURN(json_value_get_object, TEST_JSON_OBJECT);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_value_get_object, NULL);
 
-    REGISTER_GLOBAL_MOCK_RETURN(json_object_get_value, TEST_JSON_VALUE);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_object_get_value, NULL);
-
     REGISTER_GLOBAL_MOCK_RETURN(json_object_get_string, TEST_CONST_CHAR_PTR);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_object_get_string, NULL);
 
-    REGISTER_GLOBAL_MOCK_RETURN(json_value_get_string, TEST_CONST_CHAR_PTR);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_value_get_string, NULL);
+    REGISTER_GLOBAL_MOCK_RETURN(json_object_get_number, 42);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_object_get_number, -1);
 
-    REGISTER_GLOBAL_MOCK_RETURN(json_value_get_number, 42);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_value_get_number, 0);
+    REGISTER_GLOBAL_MOCK_RETURN(json_object_dotget_string, TEST_CONST_CHAR_PTR);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_object_dotget_string, NULL);
 
-    REGISTER_GLOBAL_MOCK_HOOK(json_serialize_to_string, my_json_serialize_to_string);
+    REGISTER_GLOBAL_MOCK_RETURN(json_object_set_string, TEST_JSON_STATUS);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_object_set_string, -1);
+
+    REGISTER_GLOBAL_MOCK_RETURN(json_object_dotset_string, TEST_JSON_STATUS);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_object_dotset_string, -1);
+
+    REGISTER_GLOBAL_MOCK_RETURN(json_parse_string, TEST_JSON_VALUE);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_parse_string, NULL);
+
+    REGISTER_GLOBAL_MOCK_RETURN(json_serialize_to_string, TEST_CHAR_PTR);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_serialize_to_string, NULL);
+
+    REGISTER_GLOBAL_MOCK_RETURN(json_array_get_array, TEST_JSON_ARRAY);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_array_get_array, NULL);
+
+    REGISTER_GLOBAL_MOCK_RETURN(json_array_get_object, TEST_JSON_OBJECT);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_array_get_object, NULL);
+
+    REGISTER_GLOBAL_MOCK_RETURN(json_value_get_array, TEST_JSON_ARRAY);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_value_get_array, NULL);
+
+    REGISTER_GLOBAL_MOCK_RETURN(json_object_clear, JSONSuccess);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_object_clear, JSONFailure);
+
+    REGISTER_GLOBAL_MOCK_RETURN(json_array_clear, JSONSuccess);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_array_clear, JSONFailure);
+
+    REGISTER_GLOBAL_MOCK_RETURN(json_object_dotset_boolean, JSONSuccess);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_object_dotset_boolean, JSONFailure);
+
+    REGISTER_GLOBAL_MOCK_RETURN(json_object_dotget_boolean, JSONSuccess);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_object_dotget_boolean, -1);
+
+    REGISTER_GLOBAL_MOCK_RETURN(json_object_dotget_object, TEST_JSON_OBJECT);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_object_dotget_object, NULL);
 }
 
 TEST_SUITE_CLEANUP(TestClassCleanup)
