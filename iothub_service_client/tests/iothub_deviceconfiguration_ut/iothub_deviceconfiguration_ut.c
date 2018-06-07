@@ -768,8 +768,23 @@ static void set_expected_calls_for_GetConfiguration_processing()
     STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_CONFIGURATION_ID))
         .SetReturn(TEST_CONFIGURATION_ID);*/
     
-    //[json_object_get_string(0000000000005151, "id")][json_object_get_string(0000000000005151, "schemaVersion")][json_object_get_string(0000000000005151, "content")][json_object_get_string(0000000000005151, "deviceContent")][json_object_get_string(0000000000005151, "modulesContent")][json_object_get_string(0000000000005151, "contentType")][json_object_get_string(0000000000005151, "targetCondition")][json_object_get_string(0000000000005151, "createdTimeUtc")][json_object_get_string(0000000000005151, "lastUpdatedTimeUtc")][json_object_get_string(0000000000005151, "priority")][json_object_get_string(0000000000005151, "metrics")][json_object_get_string(0000000000005151, "results")][json_object_get_string(0000000000005151, "queries")][json_object_get_string(0000000000005151, "etag")][mallocAndStrcpy_s(000001D65627BDE0, "TestConstChar")][mallocAndStrcpy_s(000001D65627BDD8, "TestConstChar")]
-
+    /*[json_object_get_string(0000000000005151, "id")]
+    [json_object_get_string(0000000000005151, "schemaVersion")]
+    [json_object_get_string(0000000000005151, "content")]
+    [json_object_get_string(0000000000005151, "deviceContent")]
+    [json_object_get_string(0000000000005151, "modulesContent")]
+    [json_object_get_string(0000000000005151, "contentType")]
+    ]json_object_get_string(0000000000005151, "targetCondition")]
+    [json_object_get_string(0000000000005151, "createdTimeUtc")]
+    [json_object_get_string(0000000000005151, "lastUpdatedTimeUtc")]
+    [json_object_get_string(0000000000005151, "priority")]
+    [json_object_get_string(0000000000005151, "metrics")]
+    [json_object_get_string(0000000000005151, "results")]
+    [json_object_get_string(0000000000005151, "queries")]
+    [json_object_get_string(0000000000005151, "etag")]
+    [mallocAndStrcpy_s(000001D65627BDE0, "TestConstChar")]
+    [mallocAndStrcpy_s(000001D65627BDD8, "TestConstChar")]
+    */
     STRICT_EXPECTED_CALL(json_value_free(IGNORED_NUM_ARG))
         .IgnoreArgument(1);
     
