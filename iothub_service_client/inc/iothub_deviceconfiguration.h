@@ -12,17 +12,20 @@ extern "C"
 #endif
 
 #include "azure_c_shared_utility/crt_abstractions.h"
+#include "azure_c_shared_utility/singlylinkedlist.h"
 #include <time.h>
 #include "iothub_service_client_auth.h"
 
 #include "azure_c_shared_utility/umock_c_prod.h"
 
 #define IOTHUB_DEVICE_CONFIGURATION_RESULT_VALUES \
-    IOTHUB_DEVICE_CONFIGURATION_OK,                   \
-    IOTHUB_DEVICE_CONFIGURATION_INVALID_ARG,          \
-    IOTHUB_DEVICE_CONFIGURATION_ERROR,                \
-    IOTHUB_DEVICE_CONFIGURATION_HTTPAPI_ERROR,        \
-    IOTHUB_DEVICE_CONFIGURATION_OUT_OF_MEMORY_ERROR   \
+    IOTHUB_DEVICE_CONFIGURATION_OK,                     \
+    IOTHUB_DEVICE_CONFIGURATION_INVALID_ARG,            \
+    IOTHUB_DEVICE_CONFIGURATION_ERROR,                  \
+    IOTHUB_DEVICE_CONFIGURATION_HTTPAPI_ERROR,          \
+    IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR,             \
+    IOTHUB_DEVICE_CONFIGURATION_OUT_OF_MEMORY_ERROR,    \
+    IOTHUB_DEVICE_CONFIGURATION_CONFIGURATION_NOT_EXIST \
 
 DEFINE_ENUM(IOTHUB_DEVICE_CONFIGURATION_RESULT, IOTHUB_DEVICE_CONFIGURATION_RESULT_VALUES);
 
@@ -137,7 +140,7 @@ MOCKABLE_FUNCTION(, void, IoTHubDeviceConfiguration_Destroy, IOTHUB_SERVICE_CLIE
 *
 * @return   IOTHUB_DEVICE_CONFIGURATION_RESULT upon success or an error code upon failure.
 */
-MOCKABLE_FUNCTION(, IOTHUB_DEVICE_CONFIGURATION_RESULT, IoTHubDeviceConfiguration_GetConfigurations, IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE, serviceClientDeviceConfigurationHandle, const int, maxConfigurationsCount, IOTHUB_DEVICE_CONFIGURATIONS_RESULT*, configurations);
+MOCKABLE_FUNCTION(, IOTHUB_DEVICE_CONFIGURATION_RESULT, IoTHubDeviceConfiguration_GetConfigurations, IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE, serviceClientDeviceConfigurationHandle, const int, maxConfigurationsCount, SINGLYLINKEDLIST_HANDLE, configurationsList);
 
 /** @brief  Retrieves the Configuration info for specified configurationId from IoT Hub.
 *
@@ -179,6 +182,13 @@ MOCKABLE_FUNCTION(, IOTHUB_DEVICE_CONFIGURATION_RESULT, IoTHubDeviceConfiguratio
 * @return   IOTHUB_DEVICE_CONFIGURATION_RESULT upon success or an error code upon failure.
 */
 MOCKABLE_FUNCTION(, IOTHUB_DEVICE_CONFIGURATION_RESULT, IoTHubDeviceConfiguration_DeleteConfiguration, IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE, serviceClientDeviceConfigurationHandle, const char*, configurationId);
+
+/**
+* @brief    Free members of the IOTHUB_DEVICE_CONFIGURATION structure (NOT the structure itself)
+*
+* @param    configuration      The structure to have its members freed.
+*/
+extern void IoTHubDeviceConfiguration_FreeConfigurationMembers(IOTHUB_DEVICE_CONFIGURATION* configuration);
 
 #ifdef __cplusplus
 }

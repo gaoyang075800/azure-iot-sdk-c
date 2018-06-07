@@ -621,7 +621,7 @@ static IOTHUB_REGISTRYMANAGER_RESULT parseDeviceOrModuleJsonObject(JSON_Object* 
     {
         /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_023: [ If the JSON parsing failed, IoTHubRegistryManager_CreateDevice shall return IOTHUB_REGISTRYMANAGER_JSON_ERROR ] */
         /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_035: [ If the JSON parsing failed, IoTHubRegistryManager_GetDevice shall return IOTHUB_REGISTRYMANAGER_JSON_ERROR ] */
-        LogError("mallocAndStrcpy_s failed for deviceId");
+        LogError("mallocAndStrcpy_s failed for moduleId");
         result = IOTHUB_REGISTRYMANAGER_JSON_ERROR;
     }
     else if ((primaryKey != NULL) && (mallocAndStrcpy_s((char**)&deviceOrModuleInfo->primaryKey, primaryKey) != 0))
