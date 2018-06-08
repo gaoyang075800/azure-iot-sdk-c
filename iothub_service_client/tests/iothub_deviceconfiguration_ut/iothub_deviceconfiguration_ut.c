@@ -703,7 +703,7 @@ TEST_FUNCTION(IoTHubDeviceConfiguration_GetConfiguration_return_NULL_if_input_pa
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
 
-static void set_expected_calls_for_sendHttpRequestDeviceConfiguration(const unsigned int httpStatusCode)
+static void set_expected_calls_for_sendHttpRequestDeviceConfiguration(const unsigned int httpStatusCode, HTTPAPI_REQUEST_TYPE requestType)
 {
     EXPECTED_CALL(STRING_construct(TEST_HOSTNAME));
     EXPECTED_CALL(STRING_construct(TEST_SHAREDACCESSKEY));
@@ -732,7 +732,7 @@ static void set_expected_calls_for_sendHttpRequestDeviceConfiguration(const unsi
 
     EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
 
-    EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(IGNORED_PTR_ARG, IGNORED_PTR_ARG, HTTPAPI_REQUEST_GET, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(IGNORED_PTR_ARG, IGNORED_PTR_ARG, requestType, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreAllArguments()
         .CopyOutArgumentBuffer_statusCode(&httpStatusCode, sizeof(httpStatusCode))
         .SetReturn(HTTPAPIEX_OK);
@@ -830,7 +830,7 @@ static void set_expected_calls_for_GetConfiguration_processing()
 
 }
 
-/*Tests_SRS_IOTHUBDEVICECONFIGURATION_01_019: [ IoTHubDeviceConfiguration_GetConfiguration shall create HTTP GET request URL using the given deviceId using the following format: url/configurations/[deviceId] ]*/
+/*Tests_SRS_IOTHUBDEVICECONFIGURATION_01_019: [ IoTHubDeviceConfiguration_GetConfiguration shall create HTTP GET request URL using the given configurationId using the following format: url/configurations/[configurationId] ]*/
 /*Tests_SRS_IOTHUBDEVICECONFIGURATION_01_020: [ IoTHubDeviceConfiguration_GetConfiguration shall add the following headers to the created HTTP GET request: authorization=sasToken,Request-Id=1001,Accept=application/json,Content-Type=application/json,charset=utf-8 ]*/
 /*Tests_SRS_IOTHUBDEVICECONFIGURATION_01_021: [ IoTHubDeviceConfiguration_GetConfiguration shall create an HTTPAPIEX_SAS_HANDLE handle by calling HTTPAPIEX_SAS_Create ]*/
 /*Tests_SRS_IOTHUBDEVICECONFIGURATION_01_022: [ IoTHubDeviceConfiguration_GetConfiguration shall create an HTTPAPIEX_HANDLE handle by calling HTTPAPIEX_Create ]*/
@@ -847,7 +847,7 @@ TEST_FUNCTION(IoTHubDeviceConfiguration_GetConfiguration_happy_path_status_code_
     EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
     EXPECTED_CALL(BUFFER_new());
 
-    set_expected_calls_for_sendHttpRequestDeviceConfiguration(httpStatusCodeOk);
+    set_expected_calls_for_sendHttpRequestDeviceConfiguration(httpStatusCodeOk, HTTPAPI_REQUEST_GET);
     set_expected_calls_for_GetConfiguration_processing();
 
     // act
@@ -864,6 +864,115 @@ TEST_FUNCTION(IoTHubDeviceConfiguration_GetConfiguration_happy_path_status_code_
     // cleanup
     //TODO: Readd after free() mock call sequence has been figured out
 	//IoTHubDeviceConfiguration_FreeConfigurationMembers(&configuration);
+}
+
+/* Tests_SRS_IOTHUBDEVICECONFIGURATION_01_052: [ IoTHubDeviceConfiguration_DeleteConfiguration shall verify the input parameters and if any of them are NULL then return IOTHUB_DEVICE_CONFIGURATION_INVALID_ARG ] */
+TEST_FUNCTION(IoTHubDeviceConfiguration_DeleteConfiguration_return_IOTHUB_DEVICECONFIGURATION_INVALID_ARG_if_input_parameter_configurationManagerHandle_is_NULL)
+{
+	///arrange
+
+	///act
+	IOTHUB_DEVICE_CONFIGURATION_RESULT result = IoTHubDeviceConfiguration_DeleteConfiguration(NULL, TEST_CONST_CHAR_PTR);
+
+	///assert
+	ASSERT_ARE_EQUAL(int, IOTHUB_DEVICE_CONFIGURATION_INVALID_ARG, result);
+	ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+}
+
+/* Tests_SRS_IOTHUBDEVICECONFIGURATION_01_052: [ IoTHubDeviceConfiguration_DeleteConfiguration shall verify the input parameters and if any of them are NULL then return IOTHUB_DEVICE_CONFIGURATION_INVALID_ARG ] */
+TEST_FUNCTION(IoTHubDeviceConfiguration_DeleteConfiguration_return_IOTHUB_DEVICECONFIGURATION_INVALID_ARG_if_input_parameter_configurationId_is_NULL)
+{
+	///arrange
+	IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE handle = IoTHubDeviceConfiguration_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
+	ASSERT_IS_NOT_NULL(handle);
+
+	umock_c_reset_all_calls();
+
+	///act
+	IOTHUB_DEVICE_CONFIGURATION_RESULT result = IoTHubDeviceConfiguration_DeleteConfiguration(handle, NULL);
+
+	///assert
+	ASSERT_ARE_EQUAL(int, IOTHUB_DEVICE_CONFIGURATION_INVALID_ARG, result);
+	ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+}
+
+/* Tests_SRS_IOTHUBDEVICECONFIGURATION_01_053: [ IoTHubDeviceConfiguration_DeleteConfiguration shall create HTTP DELETE request URL using the given configurationId using the following format : url/configurations/[configurationId]  ] */
+/* Tests_SRS_IOTHUBDEVICECONFIGURATION_01_054: [ IoTHubDeviceConfiguration_DeleteConfiguration shall add the following headers to the created HTTP GET request : authorization=sasToken,Request-Id=<generatedGuid>,Accept=application/json,Content-Type=application/json,charset=utf-8 ] */
+/* Tests_SRS_IOTHUBDEVICECONFIGURATION_01_055: [ IoTHubDeviceConfiguration_DeleteConfiguration shall create an HTTPAPIEX_SAS_HANDLE handle by calling HTTPAPIEX_SAS_Create ] */
+/* Tests_SRS_IOTHUBDEVICECONFIGURATION_01_056: [ IoTHubDeviceConfiguration_DeleteConfiguration shall create an HTTPAPIEX_HANDLE handle by calling HTTPAPIEX_Create ] */
+/* Tests_SRS_IOTHUBDEVICECONFIGURATION_01_057: [ IoTHubDeviceConfiguration_DeleteConfiguration shall execute the HTTP DELETE request by calling HTTPAPIEX_ExecuteRequest ] */
+/* Tests_SRS_IOTHUBDEVICECONFIGURATION_01_058: [ IoTHubDeviceConfiguration_DeleteConfiguration shall verify the received HTTP status code and if it is greater than 300 then return IOTHUB_DEVICE_CONFIGURATION_HTTP_STATUS_ERROR ] */
+/* Tests_SRS_IOTHUBDEVICECONFIGURATION_01_059: [ IoTHubDeviceConfiguration_DeleteConfiguration shall verify the received HTTP status code and if it is less or equal than 300 then return IOTHUB_DEVICE_CONFIGURATION_OK ] */
+TEST_FUNCTION(IoTHubDeviceConfiguration_DeleteConfiguration_happy_path)
+{
+	///arrange
+	IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE handle = IoTHubDeviceConfiguration_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
+	ASSERT_IS_NOT_NULL(handle);
+
+	umock_c_reset_all_calls();
+	
+	set_expected_calls_for_sendHttpRequestDeviceConfiguration(httpStatusCodeOk, HTTPAPI_REQUEST_DELETE);
+
+	///act
+	IOTHUB_DEVICE_CONFIGURATION_RESULT result = IoTHubDeviceConfiguration_DeleteConfiguration(handle, TEST_CONST_CHAR_PTR);
+
+	///assert
+	ASSERT_ARE_EQUAL(int, IOTHUB_DEVICE_CONFIGURATION_OK, result);
+	ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+}
+
+/* Tests_SRS_IOTHUBDEVICECONFIGURATION_01_053: [ IoTHubDeviceConfiguration_DeleteConfiguration shall create HTTP DELETE request URL using the given configurationId using the following format : url/configurations/[configurationId ] */
+/* Tests_SRS_IOTHUBDEVICECONFIGURATION_01_054: [ IoTHubDeviceConfiguration_DeleteConfiguration shall add the following headers to the created HTTP GET request : authorization=sasToken,Request-Id=<generatedGuid>,Accept=application/json,Content-Type=application/json,charset=utf-8  ] */
+/* Tests_SRS_IOTHUBDEVICECONFIGURATION_01_055: [ IoTHubDeviceConfiguration_DeleteConfiguration shall create an HTTPAPIEX_SAS_HANDLE handle by calling HTTPAPIEX_SAS_Create ] */
+/* Tests_SRS_IOTHUBDEVICECONFIGURATION_01_056: [ IoTHubDeviceConfiguration_DeleteConfiguration shall create an HTTPAPIEX_HANDLE handle by calling HTTPAPIEX_Create ] */
+/* Tests_SRS_IOTHUBDEVICECONFIGURATION_01_057: [ IoTHubDeviceConfiguration_DeleteConfiguration shall execute the HTTP DELETE request by calling HTTPAPIEX_ExecuteRequest ] */
+/* Tests_SRS_IOTHUBDEVICECONFIGURATION_01_058: [ IoTHubDeviceConfiguration_DeleteConfiguration shall verify the received HTTP status code and if it is greater than 300 then return IOTHUB_DEVICE_CONFIGURATION_HTTP_STATUS_ERROR ] */
+/* Tests_SRS_IOTHUBDEVICECONFIGURATION_01_059: [ IoTHubDeviceConfiguration_DeleteConfiguration shall verify the received HTTP status code and if it is less or equal than 300 then return IOTHUB_DEVICE_CONFIGURATION_OK ] */
+TEST_FUNCTION(IoTHubDeviceConfiguration_DeleteConfiguration_non_happy_path)
+{
+	///arrange
+	IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE handle = IoTHubDeviceConfiguration_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
+	ASSERT_IS_NOT_NULL(handle);
+
+	umock_c_reset_all_calls();
+	
+	int umockc_result = umock_c_negative_tests_init();
+	ASSERT_ARE_EQUAL(int, 0, umockc_result);
+
+	set_expected_calls_for_sendHttpRequestDeviceConfiguration(httpStatusCodeOk, HTTPAPI_REQUEST_DELETE);
+
+	umock_c_negative_tests_snapshot();
+
+	///act
+	for (size_t i = 0; i < umock_c_negative_tests_call_count(); i++)
+	{
+		/// arrange
+		umock_c_negative_tests_reset();
+		umock_c_negative_tests_fail_call(i);
+
+		/// act
+		if (
+			(i != 6) && /*UniqueId_Generate*/
+			(i != 11) && /*gballoc_free*/
+			(i != 14) && /*STRING_c_str*/
+			(i != 15) && /*HTTPAPIEX_SAS_Destroy*/
+			(i != 16) && /*STRING_delete*/
+			(i != 17) && /*HTTPAPIEX_Destroy*/
+			(i != 18) && /*HTTPAPIEX_SAS_Destroy*/
+			(i != 19) && /*HTTPHeaders_Free*/
+			(i != 20) && /*STRING_delete*/
+			(i != 21) && /*STRING_delete*/
+			(i != 22)    /*STRING_delete*/
+			)
+		{
+			IOTHUB_DEVICE_CONFIGURATION_RESULT result = IoTHubDeviceConfiguration_DeleteConfiguration(handle, TEST_CONST_CHAR_PTR);
+			
+			/// assert
+			ASSERT_ARE_NOT_EQUAL(int, IOTHUB_DEVICE_CONFIGURATION_OK, result);
+		}
+		///cleanup
+	}
+	umock_c_negative_tests_deinit();
 }
 
 END_TEST_SUITE(iothub_deviceconfiguration_ut)

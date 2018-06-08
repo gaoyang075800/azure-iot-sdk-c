@@ -126,7 +126,7 @@ static STRING_HANDLE createRelativePath(IOTHUB_DEVICECONFIGURATION_REQUEST_MODE 
 
 static HTTP_HEADERS_HANDLE createHttpHeader(IOTHUB_DEVICECONFIGURATION_REQUEST_MODE iotHubDeviceConfigurationRequestMode)
 {
-    /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_020: [ IoTHubDeviceConfiguration_GetConfiguration shall add the following headers to the created HTTP GET request: authorization=sasToken,Request-Id=1001,Accept=application/json,Content-Type=application/json,charset=utf-8 ]*/
+    /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_020: [ IoTHubDeviceConfiguration_GetConfiguration shall add the following headers to the created HTTP GET request: authorization=sasToken,Request-Id=<generatedGuid>,Accept=application/json,Content-Type=application/json,charset=utf-8 ]*/
     HTTP_HEADERS_HANDLE httpHeader;
     const char* guid = NULL;
 
@@ -164,7 +164,7 @@ static HTTP_HEADERS_HANDLE createHttpHeader(IOTHUB_DEVICECONFIGURATION_REQUEST_M
         HTTPHeaders_Free(httpHeader);
         httpHeader = NULL;
     }
-    else if ((iotHubDeviceConfigurationRequestMode == IOTHUB_DEVICECONFIGURATION_REQUEST_ADD) || (iotHubDeviceConfigurationRequestMode == IOTHUB_DEVICECONFIGURATION_REQUEST_UPDATE) || (iotHubDeviceConfigurationRequestMode != IOTHUB_DEVICECONFIGURATION_REQUEST_DELETE))
+    else if ((iotHubDeviceConfigurationRequestMode == IOTHUB_DEVICECONFIGURATION_REQUEST_ADD) || (iotHubDeviceConfigurationRequestMode == IOTHUB_DEVICECONFIGURATION_REQUEST_UPDATE) || (iotHubDeviceConfigurationRequestMode == IOTHUB_DEVICECONFIGURATION_REQUEST_DELETE))
     {
         if (HTTPHeaders_AddHeaderNameValuePair(httpHeader, HTTP_HEADER_KEY_IFMATCH, HTTP_HEADER_VAL_IFMATCH) != HTTP_HEADERS_OK)
         {
@@ -210,7 +210,7 @@ static IOTHUB_DEVICE_CONFIGURATION_RESULT sendHttpRequestDeviceConfiguration(IOT
         STRING_delete(uriResource);
         result = IOTHUB_DEVICE_CONFIGURATION_ERROR;
     }
-    /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_020: [ IoTHubDeviceConfiguration_GetConfiguration shall add the following headers to the created HTTP GET request: authorization=sasToken,Request-Id=1001,Accept=application/json,Content-Type=application/json,charset=utf-8 ]*/
+    /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_020: [ IoTHubDeviceConfiguration_GetConfiguration shall add the following headers to the created HTTP GET request: authorization=sasToken,Request-Id=<generatedGuid>,Accept=application/json,Content-Type=application/json,charset=utf-8 ]*/
     else if ((httpHeader = createHttpHeader(iotHubDeviceConfigurationRequestMode)) == NULL)
     {
         /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_024: [ If any of the call fails during the HTTP creation IoTHubDeviceConfiguration_GetConfiguration shall fail and return NULL ]*/
@@ -485,13 +485,6 @@ static IOTHUB_DEVICE_CONFIGURATION_RESULT parseDeviceConfigurationJsonObject(JSO
         LogError("mallocAndStrcpy_s failed for lastUpdatedTimeUtc");
         result = IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR;
     }
-    //else if ((metrics != NULL) && (mallocAndStrcpy_s((char**)&configuration->metrics, metrics) != 0))
-    //{
-    //    /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_023: [ If the JSON parsing failed, IoTHubDeviceConfiguration_AddConfiguration shall return IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR ] */
-    //    /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_035: [ If the JSON parsing failed, IoTHubDeviceConfiguration_GetConfiguration shall return IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR ] */
-    //    LogError("mallocAndStrcpy_s failed for deviceProperties");
-    //    result = IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR;
-    //}
     else
     {
         if (priority != NULL)
@@ -789,8 +782,25 @@ IOTHUB_DEVICE_CONFIGURATION_RESULT IoTHubDeviceConfiguration_UpdateConfiguration
 
 IOTHUB_DEVICE_CONFIGURATION_RESULT IoTHubDeviceConfiguration_DeleteConfiguration(IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE serviceClientDeviceConfigurationHandle, const char* configurationId)
 {
-    (void)serviceClientDeviceConfigurationHandle;
-    (void)configurationId;
+	IOTHUB_DEVICE_CONFIGURATION_RESULT result;
 
-    return IOTHUB_DEVICE_CONFIGURATION_OK;
+	/*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_052: [ IoTHubDeviceConfiguration_DeleteConfiguration shall verify the input parameters and if any of them are NULL then return IOTHUB_DEVICE_CONFIGURATION_INVALID_ARG ]*/
+	if ((serviceClientDeviceConfigurationHandle == NULL) || (configurationId == NULL))
+	{
+		LogError("Input parameter cannot be NULL");
+		result = IOTHUB_DEVICE_CONFIGURATION_INVALID_ARG;
+	}
+	else
+	{
+		/*SRS_IOTHUBDEVICECONFIGURATION_01_053: [ IoTHubDeviceConfiguration_DeleteConfiguration shall create HTTP DELETE request URL using the given configurationId using the following format : url/configurations/[configurationId]?api-version  ] */
+		/*SRS_IOTHUBDEVICECONFIGURATION_01_054: [ IoTHubDeviceConfiguration_DeleteConfiguration shall add the following headers to the created HTTP GET request : authorization=sasToken,Request-Id=<generatedGuid>,Accept=application/json,Content-Type=application/json,charset=utf-8 ] */
+		/*SRS_IOTHUBDEVICECONFIGURATION_01_055: [ IoTHubDeviceConfiguration_DeleteConfiguration shall create an HTTPAPIEX_SAS_HANDLE handle by calling HTTPAPIEX_SAS_Create ] */
+		/*SRS_IOTHUBDEVICECONFIGURATION_01_056: [ IoTHubDeviceConfiguration_DeleteConfiguration shall create an HTTPAPIEX_HANDLE handle by calling HTTPAPIEX_Create ] */
+		/*SRS_IOTHUBDEVICECONFIGURATION_01_057: [ IoTHubDeviceConfiguration_DeleteConfiguration shall execute the HTTP DELETE request by calling HTTPAPIEX_ExecuteRequest ] */
+		/*SRS_IOTHUBDEVICECONFIGURATION_01_058: [ IoTHubDeviceConfiguration_DeleteConfiguration shall verify the received HTTP status code and if it is greater than 300 then return IOTHUB_DEVICE_CONFIGURATION_HTTP_STATUS_ERROR ] */
+		/*SRS_IOTHUBDEVICECONFIGURATION_01_059: [ IoTHubDeviceConfiguration_DeleteConfiguration shall verify the received HTTP status code and if it is less or equal than 300 then return IOTHUB_DEVICE_CONFIGURATION_OK ] */
+		result = sendHttpRequestDeviceConfiguration(serviceClientDeviceConfigurationHandle, IOTHUB_DEVICECONFIGURATION_REQUEST_DELETE, configurationId, NULL, NULL);
+	}
+
+	return result;
 }
