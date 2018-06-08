@@ -37,21 +37,21 @@ typedef struct IOTHUB_DEVICE_CONFIGURATION_CONTENT_TAG
 
 typedef struct IOTHUB_DEVICE_CONFIGURATION_METRICS_RESULTS_TAG
 {
-    const long numQueries;
+    long numQueries;
     const char** queryNames;
     const void* results;
 } IOTHUB_DEVICE_CONFIGURATION_METRICS_RESULT;
 
 typedef struct IOTHUB_DEVICE_CONFIGURATION_METRICS_DEFINITION_TAG
 {
-    const long numQueries;
+    long numQueries;
     const char** queryNames;
     const char** queryStrings;
 } IOTHUB_DEVICE_CONFIGURATION_METRICS_DEFINITION;
 
 typedef struct IOTHUB_DEVICE_CONFIGURATION_LABEL_TAG
 {
-    const long numLabels;
+    long numLabels;
     const char** labelName;
     const char** labelValue;
 } IOTHUB_DEVICE_CONFIGURATION_LABELS;
