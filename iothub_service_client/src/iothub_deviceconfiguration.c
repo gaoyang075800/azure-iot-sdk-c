@@ -58,15 +58,13 @@ static const char* CONFIGURATION_JSON_KEY_SYSTEM_METRICS_QUERIES = "systemMetric
 static const char* CONFIGURATION_JSON_KEY_CUSTOM_METRICS_RESULTS = "metrics.results";
 static const char* CONFIGURATION_JSON_KEY_CUSTOM_METRICS_QUERIES = "metrics.queries";
 static const char* CONFIGURATION_JSON_KEY_ETAG = "etag";
-static const char* CONFIGURATION_CONTENT_PAYLOAD = "{\"deviceContent\": \"%s\", \"modulesContent\": \"%s\"}";
+//static const char* CONFIGURATION_CONTENT_PAYLOAD = "{\"deviceContent\": \"%s\", \"modulesContent\": \"%s\"}";
 
 static const char* const URL_API_VERSION = "api-version=2018-03-01-preview";
 
 static const char* const RELATIVE_PATH_FMT_DEVICECONFIGURATION = "/configurations/%s?%s";
 static const char* const RELATIVE_PATH_FMT_DEVICECONFIGURATIONS = "/configurations/?top=%s&%s";
 static const char* const RELATIVE_PATH_FMT_DEVICECONFIGURATION_TESTQUERIES = "/configurationstestQueries?%s";
-
-static const char* const CONFIGURATION_DEFAULT_CONTENT_TYPE = "assignment";
 
 //TODO: add this to devices API
 //static const char* const RELATIVE_PATH_FMT_APPLY_DEVICECONFIGURATION = "/devices/%s/applyConfigurationContent?";
@@ -261,7 +259,7 @@ static IOTHUB_DEVICE_CONFIGURATION_RESULT sendHttpRequestDeviceConfiguration(IOT
         {
             httpApiRequestType = HTTPAPI_REQUEST_PUT;
         }
-        else if ((iotHubDeviceConfigurationRequestMode == IOTHUB_DEVICECONFIGURATION_REQUEST_TESTQUERIES))
+        else if (iotHubDeviceConfigurationRequestMode == IOTHUB_DEVICECONFIGURATION_REQUEST_TESTQUERIES)
         {
             httpApiRequestType = HTTPAPI_REQUEST_POST;
         }
@@ -269,7 +267,7 @@ static IOTHUB_DEVICE_CONFIGURATION_RESULT sendHttpRequestDeviceConfiguration(IOT
         {
             httpApiRequestType = HTTPAPI_REQUEST_GET;
         }
-        else if ((iotHubDeviceConfigurationRequestMode == IOTHUB_DEVICECONFIGURATION_REQUEST_DELETE))
+        else if (iotHubDeviceConfigurationRequestMode == IOTHUB_DEVICECONFIGURATION_REQUEST_DELETE)
         {
             httpApiRequestType = HTTPAPI_REQUEST_DELETE;
         }
@@ -326,6 +324,7 @@ static IOTHUB_DEVICE_CONFIGURATION_RESULT sendHttpRequestDeviceConfiguration(IOT
     return result;
 }
 
+/*
 static BUFFER_HANDLE createConfigurationContentPayloadJson(IOTHUB_DEVICE_CONFIGURATION_CONTENT configurationContent)
 {
     STRING_HANDLE stringHandle;
@@ -350,6 +349,7 @@ static BUFFER_HANDLE createConfigurationContentPayloadJson(IOTHUB_DEVICE_CONFIGU
     }
     return result;
 }
+*/
 
 static IOTHUB_DEVICE_CONFIGURATION_RESULT parseDeviceConfigurationMetricsJsonObject(JSON_Object* systemMetricsResults, JSON_Object* systemMetricsQueries, IOTHUB_DEVICE_CONFIGURATION_METRICS_RESULT* results, IOTHUB_DEVICE_CONFIGURATION_METRICS_DEFINITION* queries)
 {
