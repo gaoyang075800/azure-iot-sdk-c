@@ -167,7 +167,7 @@ MOCKABLE_FUNCTION(, IOTHUB_DEVICE_CONFIGURATION_RESULT, IoTHubDeviceConfiguratio
 *
 * @return   IOTHUB_DEVICE_CONFIGURATION_RESULT upon success or an error code upon failure.
 */
-MOCKABLE_FUNCTION(, IOTHUB_DEVICE_CONFIGURATION_RESULT, IoTHubDeviceConfiguration_UpdateConfiguration, IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE, serviceClientDeviceConfigurationHandle, const IOTHUB_DEVICE_CONFIGURATION_UPDATE*, configurationUpdate, IOTHUB_DEVICE_CONFIGURATION*, configuration);
+MOCKABLE_FUNCTION(, IOTHUB_DEVICE_CONFIGURATION_RESULT, IoTHubDeviceConfiguration_UpdateConfiguration, IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE, serviceClientDeviceConfigurationHandle, const IOTHUB_DEVICE_CONFIGURATION*, configuration);
 
 /** @brief  Deletes the given Configuration from IoT Hub.
 *
