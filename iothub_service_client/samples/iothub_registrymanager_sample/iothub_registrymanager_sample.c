@@ -98,6 +98,7 @@ int main(void)
         deviceCreateInfo.secondaryKey = "";
         deviceCreateInfo.authMethod = IOTHUB_REGISTRYMANAGER_AUTH_SPK;
 
+        //TODO: Switch this to IOTHUB_DEVICE_EX
         IOTHUB_DEVICE deviceInfo;
 
         // Create device
@@ -119,7 +120,7 @@ int main(void)
 
         // Update device
         IOTHUB_REGISTRY_DEVICE_UPDATE deviceUpdateInfo;
-        (void)memset(&deviceUpdateInfo, 0, sizeof(IOTHUB_REGISTRY_DEVICE_CREATE));
+        (void)memset(&deviceUpdateInfo, 0, sizeof(IOTHUB_REGISTRY_DEVICE_UPDATE));
 
         deviceUpdateInfo.deviceId = deviceId;
         deviceUpdateInfo.primaryKey = "aaabbbcccdddeeefffggghhhiiijjjkkklllmmmnnnoo";
@@ -138,6 +139,7 @@ int main(void)
 
         // Get device
         (void)memset(&deviceInfo, 0, sizeof(IOTHUB_DEVICE));
+
         result = IoTHubRegistryManager_GetDevice(iotHubRegistryManagerHandle, deviceCreateInfo.deviceId, &deviceInfo);
         if (result == IOTHUB_REGISTRYMANAGER_OK)
         {

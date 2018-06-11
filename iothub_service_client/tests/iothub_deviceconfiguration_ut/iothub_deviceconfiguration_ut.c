@@ -77,6 +77,9 @@ MOCKABLE_FUNCTION(, void, json_value_free, JSON_Value *, value);
 MOCKABLE_FUNCTION(, JSON_Status, json_object_dotset_boolean, JSON_Object*, object, const char *, name, int, boolean);
 MOCKABLE_FUNCTION(, int, json_object_dotget_boolean, const JSON_Object *, object, const char *, name);
 MOCKABLE_FUNCTION(, JSON_Object*, json_object_dotget_object, const JSON_Object *, object, const char *, name);
+MOCKABLE_FUNCTION(, JSON_Value*, json_object_dotget_value, const JSON_Object *, object, const char *, name);
+MOCKABLE_FUNCTION(, JSON_Status, json_object_set_value, JSON_Object *, object, const char *, name, JSON_Value *, value);
+MOCKABLE_FUNCTION(, JSON_Status, json_object_set_number, JSON_Object *, object, const char *, name, double, number);
 
 #undef ENABLE_MOCKS
 
@@ -437,6 +440,9 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
 
     REGISTER_GLOBAL_MOCK_RETURN(json_object_dotget_object, TEST_JSON_OBJECT);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_object_dotget_object, NULL);
+
+	REGISTER_GLOBAL_MOCK_RETURN(json_object_dotget_value, TEST_JSON_VALUE);
+	REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_object_dotget_value, NULL);
 }
 
 TEST_SUITE_CLEANUP(TestClassCleanup)
@@ -854,7 +860,7 @@ TEST_FUNCTION(IoTHubDeviceConfiguration_GetConfiguration_happy_path_status_code_
     IOTHUB_DEVICE_CONFIGURATION configuration;
     const char* configurationId = " ";
     IOTHUB_DEVICE_CONFIGURATION_RESULT result = IoTHubDeviceConfiguration_GetConfiguration(handle, configurationId, &configuration);
-
+    (void)result;
     // assert
     //TODO: Fixup mock expected calls after integration is complete
     //ASSERT_ARE_EQUAL(int, IOTHUB_DEVICE_CONFIGURATION_OK, result);

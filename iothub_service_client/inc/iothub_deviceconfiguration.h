@@ -19,13 +19,14 @@ extern "C"
 #include "azure_c_shared_utility/umock_c_prod.h"
 
 #define IOTHUB_DEVICE_CONFIGURATION_RESULT_VALUES \
-    IOTHUB_DEVICE_CONFIGURATION_OK,                     \
-    IOTHUB_DEVICE_CONFIGURATION_INVALID_ARG,            \
-    IOTHUB_DEVICE_CONFIGURATION_ERROR,                  \
-    IOTHUB_DEVICE_CONFIGURATION_HTTPAPI_ERROR,          \
-    IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR,             \
-    IOTHUB_DEVICE_CONFIGURATION_OUT_OF_MEMORY_ERROR,    \
-    IOTHUB_DEVICE_CONFIGURATION_CONFIGURATION_NOT_EXIST \
+    IOTHUB_DEVICE_CONFIGURATION_OK,                      \
+    IOTHUB_DEVICE_CONFIGURATION_INVALID_ARG,             \
+    IOTHUB_DEVICE_CONFIGURATION_ERROR,                   \
+    IOTHUB_DEVICE_CONFIGURATION_HTTPAPI_ERROR,           \
+    IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR,              \
+    IOTHUB_DEVICE_CONFIGURATION_OUT_OF_MEMORY_ERROR,     \
+    IOTHUB_DEVICE_CONFIGURATION_CONFIGURATION_NOT_EXIST, \
+    IOTHUB_DEVICE_CONFIGURATION_CONFIGURATION_EXIST      \
 
 DEFINE_ENUM(IOTHUB_DEVICE_CONFIGURATION_RESULT, IOTHUB_DEVICE_CONFIGURATION_RESULT_VALUES);
 
@@ -37,21 +38,21 @@ typedef struct IOTHUB_DEVICE_CONFIGURATION_CONTENT_TAG
 
 typedef struct IOTHUB_DEVICE_CONFIGURATION_METRICS_RESULTS_TAG
 {
-    long numQueries;
+    size_t numQueries;
     const char** queryNames;
     const void* results;
 } IOTHUB_DEVICE_CONFIGURATION_METRICS_RESULT;
 
 typedef struct IOTHUB_DEVICE_CONFIGURATION_METRICS_DEFINITION_TAG
 {
-    long numQueries;
+    size_t numQueries;
     const char** queryNames;
     const char** queryStrings;
 } IOTHUB_DEVICE_CONFIGURATION_METRICS_DEFINITION;
 
 typedef struct IOTHUB_DEVICE_CONFIGURATION_LABEL_TAG
 {
-    long numLabels;
+    size_t numLabels;
     const char** labelName;
     const char** labelValue;
 } IOTHUB_DEVICE_CONFIGURATION_LABELS;
@@ -81,8 +82,8 @@ typedef struct IOTHUB_DEVICE_CONFIGURATION_TAG
     IOTHUB_DEVICE_CONFIGURATION_METRICS_DEFINITION metricsDefinition;             //version 1+
 } IOTHUB_DEVICE_CONFIGURATION;
 
-#define IOTHUB_DEVICE_CONFIGURATION_CREATE_VERSION_1 1
-typedef struct IOTHUB_DEVICE_CONFIGURATION_CREATE_TAG
+#define IOTHUB_DEVICE_CONFIGURATION_ADD_VERSION_1 1
+typedef struct IOTHUB_DEVICE_CONFIGURATION_ADD_TAG
 {
     int version;
     const char* configurationId;                                    //version 1+
@@ -92,7 +93,7 @@ typedef struct IOTHUB_DEVICE_CONFIGURATION_CREATE_TAG
     IOTHUB_DEVICE_CONFIGURATION_CONTENT content;                    //version 1+
     IOTHUB_DEVICE_CONFIGURATION_LABELS labels;                      //version 1+
     IOTHUB_DEVICE_CONFIGURATION_METRICS_DEFINITION metrics;         //version 1+
-} IOTHUB_DEVICE_CONFIGURATION_CREATE;
+} IOTHUB_DEVICE_CONFIGURATION_ADD;
 
 #define IOTHUB_DEVICE_CONFIGURATION_UPDATE_VERSION_1 1
 typedef struct IOTHUB_DEVICE_CONFIGURATION_UPDATE_TAG
@@ -149,18 +150,18 @@ MOCKABLE_FUNCTION(, IOTHUB_DEVICE_CONFIGURATION_RESULT, IoTHubDeviceConfiguratio
 /** @brief  Adds the Configuration info to IoT Hub.
 *
 * @param    serviceClientDeviceConfigurationHandle    The handle created by a call to the create function.
-* @param    configurationCreate     IOTHUB_DEVICE_CONFIGURATION_CREATE structure containing
+* @param    configurationAdd     IOTHUB_DEVICE_CONFIGURATION_ADD structure containing
 *                                   the new configuration Id and other optional parameters
 * @param    configuration           Output parameter, if it is not NULL will contain the created configuration info structure
 *
 * @return   IOTHUB_DEVICE_CONFIGURATION_RESULT upon success or an error code upon failure.
 */
-MOCKABLE_FUNCTION(, IOTHUB_DEVICE_CONFIGURATION_RESULT, IoTHubDeviceConfiguration_AddConfiguration, IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE, serviceClientDeviceConfigurationHandle, const IOTHUB_DEVICE_CONFIGURATION_CREATE*, configurationCreate, IOTHUB_DEVICE_CONFIGURATION*, configuration);
+MOCKABLE_FUNCTION(, IOTHUB_DEVICE_CONFIGURATION_RESULT, IoTHubDeviceConfiguration_AddConfiguration, IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE, serviceClientDeviceConfigurationHandle, const IOTHUB_DEVICE_CONFIGURATION_ADD*, configurationAdd, IOTHUB_DEVICE_CONFIGURATION*, configuration);
 
 /** @brief  Updates (partial update) the given Configuration in IoT Hub.
 *
 * @param    serviceClientDeviceConfigurationHandle    The handle created by a call to the create function.
-* @param    configurationUpdate     IOTHUB_DEVICE_CONFIGURATION_CREATE structure containing
+* @param    configurationUpdate     IOTHUB_DEVICE_CONFIGURATION_UPDATE structure containing
 *                                   the new configuration info. Note that Configuration content cannot be updated.
 * @param    configuration           Output parameter, if it is not NULL will contain the updated configuration info structure
 *
