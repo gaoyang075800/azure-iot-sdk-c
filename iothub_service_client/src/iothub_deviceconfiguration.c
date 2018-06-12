@@ -42,7 +42,7 @@ DEFINE_ENUM_STRINGS(IOTHUB_DEVICE_CONFIGURATION_RESULT, IOTHUB_DEVICE_CONFIGURAT
 #define  HTTP_HEADER_VAL_CONTENT_TYPE  "application/json; charset=utf-8"
 #define  HTTP_HEADER_KEY_IFMATCH  "If-Match"
 #define  HTTP_HEADER_VAL_IFMATCH  "'*'"
-#define UID_LENGTH 37
+#define  UID_LENGTH 37
 
 static const char* CONFIGURATION_JSON_KEY_CONFIGURATION_ID = "id";
 static const char* CONFIGURATION_JSON_KEY_SCHEMA_VERSION = "schemaVersion";
@@ -327,43 +327,36 @@ static IOTHUB_DEVICE_CONFIGURATION_RESULT sendHttpRequestDeviceConfiguration(IOT
 
 static JSON_Value* createConfigurationContentPayload(const IOTHUB_DEVICE_CONFIGURATION_CONTENT* configurationContent)
 {
-	/*Codes_SRS_IOTHUBREGISTRYMANAGER_12_010: [ IoTHubRegistryManager_CreateDevice shall create a flat "key1:value2,key2:value2..." JSON representation from the given deviceCreateInfo parameter using the following parson APIs: json_value_init_object, json_value_get_object, json_object_set_string, json_object_dotset_string ] */
 	JSON_Value* result = NULL;
 	JSON_Object* root_object = NULL;
 
 	if (configurationContent == NULL)
 	{
-		/*Codes_SRS_IOTHUBREGISTRYMANAGER_12_013: [ IoTHubRegistryManager_CreateDevice shall return IOTHUB_REGISTRYMANAGER_ERROR_CREATING_JSON if the JSON creation failed  ] */
 		LogError("configuration cannot be null");
 		result = NULL;
 	}
 	else if (((configurationContent->deviceContent == NULL) || (configurationContent->modulesContent == NULL)) && (strlen(configurationContent->deviceContent) > 0 || strlen(configurationContent->modulesContent) > 0))
 	{
-		/*Codes_SRS_IOTHUBREGISTRYMANAGER_12_013: [ IoTHubRegistryManager_CreateDevice shall return IOTHUB_REGISTRYMANAGER_ERROR_CREATING_JSON if the JSON creation failed  ] */
 		LogError("both deviceContent and modulesContent cannot be NULL");
 		result = NULL;
 	}
 	if ((result = json_value_init_object()) == NULL)
 	{
-		/*Codes_SRS_IOTHUBREGISTRYMANAGER_12_013: [ IoTHubRegistryManager_CreateDevice shall return IOTHUB_REGISTRYMANAGER_ERROR_CREATING_JSON if the JSON creation failed  ] */
 		LogError("json_value_init_object failed");
 		result = NULL;
 	}
 	else if ((root_object = json_value_get_object(result)) == NULL)
 	{
-		/*Codes_SRS_IOTHUBREGISTRYMANAGER_12_013: [ IoTHubRegistryManager_CreateDevice shall return IOTHUB_REGISTRYMANAGER_ERROR_CREATING_JSON if the JSON creation failed  ] */
 		LogError("json_value_get_object failed");
 		result = NULL;
 	}
 	else if ((configurationContent->deviceContent != NULL) && (strlen(configurationContent->deviceContent) > 0) && (json_object_set_value(root_object, CONFIGURATION_JSON_KEY_DEVICE_CONTENT, json_parse_string(configurationContent->deviceContent))) != JSONSuccess)
 	{
-		/*Codes_SRS_IOTHUBREGISTRYMANAGER_12_013: [ IoTHubRegistryManager_CreateDevice shall return IOTHUB_REGISTRYMANAGER_ERROR_CREATING_JSON if the JSON creation failed  ] */
 		LogError("json_object_set_string failed for deviceContent");
 		result = NULL;
 	}
 	else if ((configurationContent->modulesContent != NULL) && (strlen(configurationContent->modulesContent) > 0) && (json_object_set_value(root_object, CONFIGURATION_JSON_KEY_MODULES_CONTENT, json_parse_string(configurationContent->modulesContent))) != JSONSuccess)
 	{
-		/*Codes_SRS_IOTHUBREGISTRYMANAGER_12_013: [ IoTHubRegistryManager_CreateDevice shall return IOTHUB_REGISTRYMANAGER_ERROR_CREATING_JSON if the JSON creation failed  ] */
 		LogError("json_object_set_string failed for modulesContent");
 		result = NULL;
 	}
@@ -373,7 +366,6 @@ static JSON_Value* createConfigurationContentPayload(const IOTHUB_DEVICE_CONFIGU
 
 static JSON_Value* createConfigurationMetricsQueriesPayload(const IOTHUB_DEVICE_CONFIGURATION_METRICS_DEFINITION* configurationMetricsDefinition)
 {
-	/*Codes_SRS_IOTHUBREGISTRYMANAGER_12_010: [ IoTHubRegistryManager_CreateDevice shall create a flat "key1:value2,key2:value2..." JSON representation from the given deviceCreateInfo parameter using the following parson APIs: json_value_init_object, json_value_get_object, json_object_set_string, json_object_dotset_string ] */
 	JSON_Value* result = NULL;
     JSON_Value* new_value = NULL;
 	JSON_Object* root_object = NULL;
@@ -381,25 +373,21 @@ static JSON_Value* createConfigurationMetricsQueriesPayload(const IOTHUB_DEVICE_
 
 	if (configurationMetricsDefinition == NULL)
 	{
-		/*Codes_SRS_IOTHUBREGISTRYMANAGER_12_013: [ IoTHubRegistryManager_CreateDevice shall return IOTHUB_REGISTRYMANAGER_ERROR_CREATING_JSON if the JSON creation failed  ] */
 		LogError("configuration cannot be null");
 		result = NULL;
 	}
 	else if ((result = json_value_init_object()) == NULL || (new_value = json_value_init_object()) == NULL)
     {
-        /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_013: [ IoTHubRegistryManager_CreateDevice shall return IOTHUB_REGISTRYMANAGER_ERROR_CREATING_JSON if the JSON creation failed  ] */
         LogError("json_value_init_object failed");
         result = NULL;
     }
     else if ((root_object = json_value_get_object(result)) == NULL || (new_value_object = json_value_get_object(new_value)) == NULL)
     {
-        /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_013: [ IoTHubRegistryManager_CreateDevice shall return IOTHUB_REGISTRYMANAGER_ERROR_CREATING_JSON if the JSON creation failed  ] */
         LogError("json_value_get_object failed");
         result = NULL;
     }
     else if (json_object_set_value(root_object, CONFIGURATION_JSON_KEY_METRICS_QUERIES, new_value) != JSONSuccess)
     {
-        /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_013: [ IoTHubRegistryManager_CreateDevice shall return IOTHUB_REGISTRYMANAGER_ERROR_CREATING_JSON if the JSON creation failed  ] */
         LogError("json_object_set_value failed for deviceContent");
         result = NULL;
     }
@@ -421,13 +409,11 @@ static JSON_Value* createConfigurationMetricsQueriesPayload(const IOTHUB_DEVICE_
 
 static JSON_Value* createConfigurationLabelsPayload(const IOTHUB_DEVICE_CONFIGURATION_LABELS* configurationLabels)
 {
-    /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_010: [ IoTHubRegistryManager_CreateDevice shall create a flat "key1:value2,key2:value2..." JSON representation from the given deviceCreateInfo parameter using the following parson APIs: json_value_init_object, json_value_get_object, json_object_set_string, json_object_dotset_string ] */
     JSON_Value* result = NULL;
     JSON_Object* root_object = NULL;
 
     if (configurationLabels == NULL)
     {
-        /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_013: [ IoTHubRegistryManager_CreateDevice shall return IOTHUB_REGISTRYMANAGER_ERROR_CREATING_JSON if the JSON creation failed  ] */
         LogError("configurationLabels cannot be null");
         result = NULL;
     }
@@ -437,13 +423,11 @@ static JSON_Value* createConfigurationLabelsPayload(const IOTHUB_DEVICE_CONFIGUR
     }
     else if ((result = json_value_init_object()) == NULL)
     {
-        /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_013: [ IoTHubRegistryManager_CreateDevice shall return IOTHUB_REGISTRYMANAGER_ERROR_CREATING_JSON if the JSON creation failed  ] */
         LogError("json_value_init_object failed");
         result = NULL;
     }
     else if ((root_object = json_value_get_object(result)) == NULL)
     {
-        /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_013: [ IoTHubRegistryManager_CreateDevice shall return IOTHUB_REGISTRYMANAGER_ERROR_CREATING_JSON if the JSON creation failed  ] */
         LogError("json_value_get_object failed");
         result = NULL;
     }
@@ -463,14 +447,12 @@ static JSON_Value* createConfigurationLabelsPayload(const IOTHUB_DEVICE_CONFIGUR
     return result;
 }
 
-
 static BUFFER_HANDLE createConfigurationPayloadJson(const IOTHUB_DEVICE_CONFIGURATION* configuration)
 {
     (void)configuration;
 
     BUFFER_HANDLE result;
 
-    /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_010: [ IoTHubRegistryManager_CreateDevice shall create a flat "key1:value2,key2:value2..." JSON representation from the given deviceCreateInfo parameter using the following parson APIs: json_value_init_object, json_value_get_object, json_object_set_string, json_object_dotset_string ] */
     JSON_Value* root_value = NULL;
     JSON_Object* root_object = NULL;
     JSON_Status jsonStatus;
@@ -481,97 +463,81 @@ static BUFFER_HANDLE createConfigurationPayloadJson(const IOTHUB_DEVICE_CONFIGUR
 
     if (configuration == NULL)
     {
-        /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_013: [ IoTHubRegistryManager_CreateDevice shall return IOTHUB_REGISTRYMANAGER_ERROR_CREATING_JSON if the JSON creation failed  ] */
         LogError("configuration cannot be null");
         result = NULL;
     }
     else if (configuration->configurationId == NULL)
     {
-        /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_013: [ IoTHubRegistryManager_CreateDevice shall return IOTHUB_REGISTRYMANAGER_ERROR_CREATING_JSON if the JSON creation failed  ] */
         LogError("Configuration id cannot be NULL");
         result = NULL;
     }
     else if (((configuration->content).deviceContent == NULL) && (((configuration->content).modulesContent) == NULL))
     {
-        /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_013: [ IoTHubRegistryManager_CreateDevice shall return IOTHUB_REGISTRYMANAGER_ERROR_CREATING_JSON if the JSON creation failed  ] */
         LogError("deviceContent and modulesContent both cannot be NULL");
         result = NULL;
     }
 	if ((root_value = json_value_init_object()) == NULL)
 	{
-		/*Codes_SRS_IOTHUBREGISTRYMANAGER_12_013: [ IoTHubRegistryManager_CreateDevice shall return IOTHUB_REGISTRYMANAGER_ERROR_CREATING_JSON if the JSON creation failed  ] */
 		LogError("json_value_init_object failed");
 		result = NULL;
 	}
 	else if ((root_object = json_value_get_object(root_value)) == NULL)
 	{
-		/*Codes_SRS_IOTHUBREGISTRYMANAGER_12_013: [ IoTHubRegistryManager_CreateDevice shall return IOTHUB_REGISTRYMANAGER_ERROR_CREATING_JSON if the JSON creation failed  ] */
 		LogError("json_value_get_object failed");
 		result = NULL;
 	}
 	else if ((json_object_set_string(root_object, CONFIGURATION_JSON_KEY_CONFIGURATION_ID, configuration->configurationId)) != JSONSuccess)
 	{
-		/*Codes_SRS_IOTHUBREGISTRYMANAGER_12_013: [ IoTHubRegistryManager_CreateDevice shall return IOTHUB_REGISTRYMANAGER_ERROR_CREATING_JSON if the JSON creation failed  ] */
 		LogError("json_object_set_string failed for configurationId");
 		result = NULL;
 	}
 	else if ((json_object_set_string(root_object, CONFIGURATION_JSON_KEY_SCHEMA_VERSION, configuration->schemaVersion)) != JSONSuccess)
 	{
-		/*Codes_SRS_IOTHUBREGISTRYMANAGER_12_013: [ IoTHubRegistryManager_CreateDevice shall return IOTHUB_REGISTRYMANAGER_ERROR_CREATING_JSON if the JSON creation failed  ] */
 		LogError("json_object_set_string failed for schemaVersion");
 		result = NULL;
 	}
 	else if ((json_object_set_string(root_object, CONFIGURATION_JSON_KEY_TARGET_CONDITION, configuration->targetCondition)) != JSONSuccess)
 	{
-		/*Codes_SRS_IOTHUBREGISTRYMANAGER_12_013: [ IoTHubRegistryManager_CreateDevice shall return IOTHUB_REGISTRYMANAGER_ERROR_CREATING_JSON if the JSON creation failed  ] */
 		LogError("json_object_set_string failed for schemaVersion");
 		result = NULL;
 	}
 	else if ((json_object_set_number(root_object, CONFIGURATION_JSON_KEY_PRIORITY, configuration->priority)) != JSONSuccess)
 	{
-		/*Codes_SRS_IOTHUBREGISTRYMANAGER_12_013: [ IoTHubRegistryManager_CreateDevice shall return IOTHUB_REGISTRYMANAGER_ERROR_CREATING_JSON if the JSON creation failed  ] */
 		LogError("json_object_set_string failed for schemaVersion");
 		result = NULL; 
 	}
 	else if ((json_object_set_string(root_object, CONFIGURATION_JSON_KEY_ETAG, configuration->eTag)) != JSONSuccess)
 	{
-		/*Codes_SRS_IOTHUBREGISTRYMANAGER_12_013: [ IoTHubRegistryManager_CreateDevice shall return IOTHUB_REGISTRYMANAGER_ERROR_CREATING_JSON if the JSON creation failed  ] */
 		LogError("json_object_set_string failed for schemaVersion");
 		result = NULL;
 	}
     else if (((configuration->createdTimeUtc  != NULL) && json_object_set_string(root_object, CONFIGURATION_JSON_KEY_CREATED_TIME, configuration->createdTimeUtc)) != JSONSuccess)
     {
-        /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_013: [ IoTHubRegistryManager_CreateDevice shall return IOTHUB_REGISTRYMANAGER_ERROR_CREATING_JSON if the JSON creation failed  ] */
         LogError("json_object_set_string failed for createdTimeUtc");
         result = NULL;
     }
     else if (((configuration->lastUpdatedTimeUtc != NULL) && json_object_set_string(root_object, CONFIGURATION_JSON_KEY_CREATED_TIME, configuration->lastUpdatedTimeUtc)) != JSONSuccess)
     {
-        /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_013: [ IoTHubRegistryManager_CreateDevice shall return IOTHUB_REGISTRYMANAGER_ERROR_CREATING_JSON if the JSON creation failed  ] */
         LogError("json_object_set_string failed for lastUpdatedTimeUtc");
         result = NULL;
     }
     else if (((configurationLabelsJson = createConfigurationLabelsPayload(&configuration->labels)) != NULL) && ((json_object_set_value(root_object, CONFIGURATION_JSON_KEY_LABELS, configurationLabelsJson)) != JSONSuccess))
     {
-        /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_013: [ IoTHubRegistryManager_CreateDevice shall return IOTHUB_REGISTRYMANAGER_ERROR_CREATING_JSON if the JSON creation failed  ] */
         LogError("json_object_set_string failed for configurationLabelsJson");
         result = NULL;
     }
 	else if ((((configurationContentJson = createConfigurationContentPayload(&configuration->content)) != NULL) && ((json_object_set_value(root_object, CONFIGURATION_JSON_KEY_CONTENT, configurationContentJson)) != JSONSuccess)))
 	{
-		/*Codes_SRS_IOTHUBREGISTRYMANAGER_12_013: [ IoTHubRegistryManager_CreateDevice shall return IOTHUB_REGISTRYMANAGER_ERROR_CREATING_JSON if the JSON creation failed  ] */
 		LogError("json_object_set_string failed for configurationContentJson");
 		result = NULL;
 	}
 	else if (((metricsQueriesJson = createConfigurationMetricsQueriesPayload(&configuration->metricsDefinition)) != NULL) && ((json_object_set_value(root_object, CONFIGURATION_JSON_KEY_CUSTOM_METRICS, metricsQueriesJson)) != JSONSuccess))
 	{
-		/*Codes_SRS_IOTHUBREGISTRYMANAGER_12_013: [ IoTHubRegistryManager_CreateDevice shall return IOTHUB_REGISTRYMANAGER_ERROR_CREATING_JSON if the JSON creation failed  ] */
 		LogError("json_object_set_string failed for metricsQueriesJson");
 		result = NULL;
 	}
     else if (((systemMetricsQueriesJson = createConfigurationMetricsQueriesPayload(&configuration->systemMetricsDefinition)) != NULL) && ((json_object_set_value(root_object, CONFIGURATION_JSON_KEY_SYSTEM_METRICS, systemMetricsQueriesJson)) != JSONSuccess))
     {
-        /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_013: [ IoTHubRegistryManager_CreateDevice shall return IOTHUB_REGISTRYMANAGER_ERROR_CREATING_JSON if the JSON creation failed  ] */
         LogError("json_object_set_string failed for systemMetricsQueriesJson");
         result = NULL;
     }
@@ -580,7 +546,6 @@ static BUFFER_HANDLE createConfigurationPayloadJson(const IOTHUB_DEVICE_CONFIGUR
 		char* serialized_string;
 		if ((serialized_string = json_serialize_to_string(root_value)) == NULL)
 		{
-			/*Codes_SRS_IOTHUBREGISTRYMANAGER_12_013: [ IoTHubRegistryManager_CreateDevice shall return IOTHUB_REGISTRYMANAGER_ERROR_CREATING_JSON if the JSON creation failed  ] */
 			LogError("json_serialize_to_string failed");
 			result = NULL;
 		}
@@ -588,7 +553,6 @@ static BUFFER_HANDLE createConfigurationPayloadJson(const IOTHUB_DEVICE_CONFIGUR
 		{
 			if ((result = BUFFER_create((const unsigned char*)serialized_string, strlen(serialized_string))) == NULL)
 			{
-				/*Codes_SRS_IOTHUBREGISTRYMANAGER_12_013: [ IoTHubRegistryManager_CreateDevice shall return IOTHUB_REGISTRYMANAGER_ERROR_CREATING_JSON if the JSON creation failed  ] */
 				LogError("Buffer_Create failed");
 				result = NULL;
 			}
@@ -598,7 +562,6 @@ static BUFFER_HANDLE createConfigurationPayloadJson(const IOTHUB_DEVICE_CONFIGUR
 
 	if ((jsonStatus = json_object_clear(root_object)) != JSONSuccess)
 	{
-		/*Codes_SRS_IOTHUBREGISTRYMANAGER_12_013: [ IoTHubRegistryManager_CreateDevice shall return IOTHUB_REGISTRYMANAGER_ERROR_CREATING_JSON if the JSON creation failed  ] */
 		LogError("json_object_clear failed");
 		BUFFER_delete(result);
 		result = NULL;
@@ -619,8 +582,6 @@ static IOTHUB_DEVICE_CONFIGURATION_RESULT parseDeviceConfigurationMetricsJsonObj
        
     if(metricResults == NULL || metricQueries == NULL)
     {
-        /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_023: [ If the JSON parsing failed, IoTHubDeviceConfiguration_AddConfiguration shall return IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR ] */
-        /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_035: [ If the JSON parsing failed, IoTHubDeviceConfiguration_GetConfiguration shall return IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR ] */
         LogError("metricResults or metricQueries cannot be NULL");
         result = IOTHUB_DEVICE_CONFIGURATION_INVALID_ARG;
     }
@@ -628,7 +589,6 @@ static IOTHUB_DEVICE_CONFIGURATION_RESULT parseDeviceConfigurationMetricsJsonObj
     {
         if (results == NULL)
         {
-            /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_002: [ If the allocation failed, IoTHubDeviceConfiguration_Create shall return NULL ]*/
             LogError("Malloc failed for IOTHUB_DEVICE_CONFIGURATION_METRICS_RESULT");
             result = IOTHUB_DEVICE_CONFIGURATION_ERROR;
         }
@@ -636,7 +596,6 @@ static IOTHUB_DEVICE_CONFIGURATION_RESULT parseDeviceConfigurationMetricsJsonObj
         {
             if (queries == NULL)
             {
-                /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_002: [ If the allocation failed, IoTHubDeviceConfiguration_Create shall return NULL ]*/
                 LogError("Malloc failed for IOTHUB_DEVICE_CONFIGURATION_METRICS_RESULT");
                 result = IOTHUB_DEVICE_CONFIGURATION_ERROR;
             }
@@ -647,13 +606,11 @@ static IOTHUB_DEVICE_CONFIGURATION_RESULT parseDeviceConfigurationMetricsJsonObj
                 {
                     if ((results->queryNames = malloc(sizeof(const char*) * metricResultsCount)) == NULL)
                     {
-                        /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_002: [ If the allocation failed, IoTHubDeviceConfiguration_Create shall return NULL ]*/
                         LogError("Malloc failed for IOTHUB_DEVICE_CONFIGURATION_METRICS_RESULT queryNames");
                         result = IOTHUB_DEVICE_CONFIGURATION_ERROR;
                     }
                     else if((results->results = malloc(sizeof(double) * metricResultsCount)) == NULL)
                     {
-                        /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_002: [ If the allocation failed, IoTHubDeviceConfiguration_Create shall return NULL ]*/
                         LogError("Malloc failed for IOTHUB_DEVICE_CONFIGURATION_METRICS_RESULT results");
                         result = IOTHUB_DEVICE_CONFIGURATION_ERROR;
                     }
@@ -663,34 +620,26 @@ static IOTHUB_DEVICE_CONFIGURATION_RESULT parseDeviceConfigurationMetricsJsonObj
                         {
                             if ((tempMetricQueryName = STRING_construct(json_object_get_name(metricResults, i))) == NULL)
                             {
-                                /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_024: [ If any of the HTTPAPI call fails IoTHubDeviceConfiguration_GetConfiguration shall fail and return NULL ]*/
                                 LogError("STRING_construct failed for tempMetricQueryName");
                                 result = IOTHUB_DEVICE_CONFIGURATION_ERROR;
                             }
                             else if (!json_object_has_value(metricResults, STRING_c_str(tempMetricQueryName)))
                             {
-                                /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_023: [ If the JSON parsing failed, IoTHubDeviceConfiguration_AddConfiguration shall return IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR ] */
-                                /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_035: [ If the JSON parsing failed, IoTHubDeviceConfiguration_GetConfiguration shall return IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR ] */
                                 LogError("missing result for query %s", tempMetricQueryName);
                                 result = IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR;
                             }
                             else if (mallocAndStrcpy_s((char**)&(results->queryNames[i]), STRING_c_str(tempMetricQueryName)) != 0)
                             {
-                                /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_023: [ If the JSON parsing failed, IoTHubDeviceConfiguration_AddConfiguration shall return IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR ] */
-                                /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_035: [ If the JSON parsing failed, IoTHubDeviceConfiguration_GetConfiguration shall return IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR ] */
                                 LogError("mallocAndStrcpy_s failed for results tempMetricQueryName");
                                 result = IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR;
                             }
                             else if ((tempMetricQueryString = STRING_construct(json_value_get_string(json_object_get_value_at(metricResults, i)))) == NULL)
                             {
-                                /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_024: [ If any of the HTTPAPI call fails IoTHubDeviceConfiguration_GetConfiguration shall fail and return NULL ]*/
                                 LogError("STRING_construct failed for tempMetricQueryString");
                                 result = IOTHUB_DEVICE_CONFIGURATION_ERROR;
                             }
                             else if (mallocAndStrcpy_s((char**)&(queries->queryStrings[i]), STRING_c_str(tempMetricQueryString)) != 0)
                             {
-                                /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_023: [ If the JSON parsing failed, IoTHubDeviceConfiguration_AddConfiguration shall return IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR ] */
-                                /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_035: [ If the JSON parsing failed, IoTHubDeviceConfiguration_GetConfiguration shall return IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR ] */
                                 LogError("mallocAndStrcpy_s failed for tempMetricQueryString");
                                 result = IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR;
                             }
@@ -708,13 +657,11 @@ static IOTHUB_DEVICE_CONFIGURATION_RESULT parseDeviceConfigurationMetricsJsonObj
 				{
                     if((queries->queryNames = malloc(sizeof(const char*) * metricQueriesCount)) == NULL)
                     {
-                        /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_002: [ If the allocation failed, IoTHubDeviceConfiguration_Create shall return NULL ]*/
                         LogError("Malloc failed for IOTHUB_DEVICE_CONFIGURATION_METRICS_DEFINITION queryNames");
                         result = IOTHUB_DEVICE_CONFIGURATION_ERROR;
                     }
                     else if((queries->queryStrings = malloc(sizeof(const char*) * metricQueriesCount)) == NULL)
                     {
-                        /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_002: [ If the allocation failed, IoTHubDeviceConfiguration_Create shall return NULL ]*/
                         LogError("Malloc failed for IOTHUB_DEVICE_CONFIGURATION_METRICS_DEFINITION queryStrings");
                         result = IOTHUB_DEVICE_CONFIGURATION_ERROR;
                     }
@@ -722,34 +669,26 @@ static IOTHUB_DEVICE_CONFIGURATION_RESULT parseDeviceConfigurationMetricsJsonObj
 					{
 						if ((tempMetricQueryName = STRING_construct(json_object_get_name(metricQueries, i))) == NULL)
 						{
-							/*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_024: [ If any of the HTTPAPI call fails IoTHubDeviceConfiguration_GetConfiguration shall fail and return NULL ]*/
 							LogError("STRING_construct failed for tempMetricQueryName");
 							result = IOTHUB_DEVICE_CONFIGURATION_ERROR;
 						}
 						else if (!json_object_has_value(metricQueries, STRING_c_str(tempMetricQueryName)))
 						{
-							/*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_023: [ If the JSON parsing failed, IoTHubDeviceConfiguration_AddConfiguration shall return IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR ] */
-							/*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_035: [ If the JSON parsing failed, IoTHubDeviceConfiguration_GetConfiguration shall return IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR ] */
 							LogError("missing result for query %s", tempMetricQueryName);
 							result = IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR;
 						}
 						else if (mallocAndStrcpy_s((char**)&(queries->queryNames[i]), STRING_c_str(tempMetricQueryName)) != 0)
 						{
-							/*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_023: [ If the JSON parsing failed, IoTHubDeviceConfiguration_AddConfiguration shall return IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR ] */
-							/*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_035: [ If the JSON parsing failed, IoTHubDeviceConfiguration_GetConfiguration shall return IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR ] */
 							LogError("mallocAndStrcpy_s failed for queries tempMetricQueryName");
 							result = IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR;
 						}
 						else if ((tempMetricQueryString = STRING_construct(json_value_get_string(json_object_get_value_at(metricQueries, i)))) == NULL)
 						{
-							/*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_024: [ If any of the HTTPAPI call fails IoTHubDeviceConfiguration_GetConfiguration shall fail and return NULL ]*/
 							LogError("STRING_construct failed for tempMetricQueryString");
 							result = IOTHUB_DEVICE_CONFIGURATION_ERROR;
 						}
 						else if (mallocAndStrcpy_s((char**)&(queries->queryStrings[i]), STRING_c_str(tempMetricQueryString)) != 0)
 						{
-							/*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_023: [ If the JSON parsing failed, IoTHubDeviceConfiguration_AddConfiguration shall return IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR ] */
-							/*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_035: [ If the JSON parsing failed, IoTHubDeviceConfiguration_GetConfiguration shall return IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR ] */
 							LogError("mallocAndStrcpy_s failed for tempMetricQueryString");
 							result = IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR;
 						}
@@ -796,64 +735,46 @@ static IOTHUB_DEVICE_CONFIGURATION_RESULT parseDeviceConfigurationJsonObject(JSO
 
     if ((configurationId != NULL) && (mallocAndStrcpy_s((char**)&(configuration->configurationId), configurationId) != 0))
     {
-        /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_023: [ If the JSON parsing failed, IoTHubDeviceConfiguration_AddConfiguration shall return IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR ] */
-        /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_035: [ If the JSON parsing failed, IoTHubDeviceConfiguration_GetConfiguration shall return IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR ] */
         LogError("mallocAndStrcpy_s failed for configurationId");
         result = IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR;
     }
     else if ((schemaVersion != NULL) && (mallocAndStrcpy_s((char**)&(configuration->schemaVersion), schemaVersion) != 0))
     {
-        /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_023: [ If the JSON parsing failed, IoTHubDeviceConfiguration_AddConfiguration shall return IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR ] */
-        /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_035: [ If the JSON parsing failed, IoTHubDeviceConfiguration_GetConfiguration shall return IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR ] */
         LogError("mallocAndStrcpy_s failed for schemaVersion");
         result = IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR;
     }
     else if ((deviceContent != NULL) && (mallocAndStrcpy_s((char**)&configuration->content.deviceContent, deviceContent) != 0))
     {
-        /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_023: [ If the JSON parsing failed, IoTHubDeviceConfiguration_AddConfiguration shall return IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR ] */
-        /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_035: [ If the JSON parsing failed, IoTHubDeviceConfiguration_GetConfiguration shall return IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR ] */
         LogError("mallocAndStrcpy_s failed for content.deviceContent");
         result = IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR;
     }
     else if ((modulesContent != NULL) && (mallocAndStrcpy_s((char**)&configuration->content.modulesContent, modulesContent) != 0))
     {
-        /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_023: [ If the JSON parsing failed, IoTHubDeviceConfiguration_AddConfiguration shall return IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR ] */
-        /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_035: [ If the JSON parsing failed, IoTHubDeviceConfiguration_GetConfiguration shall return IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR ] */
         LogError("mallocAndStrcpy_s failed for content.modulesContent");
         result = IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR;
     }
     else if ((eTag != NULL) && (mallocAndStrcpy_s((char**)&configuration->eTag, eTag) != 0))
     {
-        /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_023: [ If the JSON parsing failed, IoTHubDeviceConfiguration_AddConfiguration shall return IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR ] */
-        /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_035: [ If the JSON parsing failed, IoTHubDeviceConfiguration_GetConfiguration shall return IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR ] */
         LogError("mallocAndStrcpy_s failed for eTag");
         result = IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR;
     }
     else if ((contentType != NULL) && (mallocAndStrcpy_s((char**)&configuration->contentType, contentType) != 0))
     {
-        /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_023: [ If the JSON parsing failed, IoTHubDeviceConfiguration_AddConfiguration shall return IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR ] */
-        /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_035: [ If the JSON parsing failed, IoTHubDeviceConfiguration_GetConfiguration shall return IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR ] */
         LogError("mallocAndStrcpy_s failed for contentType");
         result = IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR;
     }
     else if ((targetCondition != NULL) && (mallocAndStrcpy_s((char**)&configuration->targetCondition, targetCondition) != 0))
     {
-        /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_023: [ If the JSON parsing failed, IoTHubDeviceConfiguration_AddConfiguration shall return IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR ] */
-        /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_035: [ If the JSON parsing failed, IoTHubDeviceConfiguration_GetConfiguration shall return IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR ] */
         LogError("mallocAndStrcpy_s failed for targetCondition");
         result = IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR;
     }
     else if ((createdTime != NULL) && (mallocAndStrcpy_s((char**)&configuration->createdTimeUtc, createdTime) != 0))
     {
-        /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_023: [ If the JSON parsing failed, IoTHubDeviceConfiguration_AddConfiguration shall return IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR ] */
-        /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_035: [ If the JSON parsing failed, IoTHubDeviceConfiguration_GetConfiguration shall return IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR ] */
         LogError("mallocAndStrcpy_s failed for createdTimeUtc");
         result = IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR;
     }
     else if ((lastUpdatedTime != NULL) && (mallocAndStrcpy_s((char**)&configuration->lastUpdatedTimeUtc, lastUpdatedTime) != 0))
     {
-        /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_023: [ If the JSON parsing failed, IoTHubDeviceConfiguration_AddConfiguration shall return IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR ] */
-        /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_035: [ If the JSON parsing failed, IoTHubDeviceConfiguration_GetConfiguration shall return IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR ] */
         LogError("mallocAndStrcpy_s failed for lastUpdatedTimeUtc");
         result = IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR;
     }
@@ -1137,7 +1058,7 @@ IOTHUB_DEVICE_CONFIGURATION_RESULT IoTHubDeviceConfiguration_AddConfiguration(IO
 {
     IOTHUB_DEVICE_CONFIGURATION_RESULT result;
 
-    /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_007: [ IoTHubDeviceConfiguration_AddConfiguration shall verify the input parameters and if any of them are NULL then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ] */
+    /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_007: [ IoTHubDeviceConfiguration_AddConfiguration shall verify the input parameters and if any of them are NULL then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ] */
     if ((serviceClientDeviceConfigurationHandle == NULL) || (configurationCreate == NULL) || (configuration == NULL))
     {
         LogError("Input parameter cannot be NULL");
@@ -1154,18 +1075,18 @@ IOTHUB_DEVICE_CONFIGURATION_RESULT IoTHubDeviceConfiguration_AddConfiguration(IO
         }
         else
         {
-            /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_095: [ IoTHubRegistryManager_CreateDevice shall allocate memory for device info structure by calling malloc ] */
+            /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_095: [ IoTHubDeviceConfiguration_AddConfiguration shall allocate memory for device info structure by calling malloc ] */
             IOTHUB_DEVICE_CONFIGURATION* tempConfigurationInfo;
             if ((tempConfigurationInfo = malloc(sizeof(IOTHUB_DEVICE_CONFIGURATION))) == NULL)
             {
-                /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_096 : [ If the malloc fails, IoTHubRegistryManager_Create shall do clean up and return IOTHUB_REGISTRYMANAGER_ERROR. ] */
+                /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_096 : [ If the malloc fails, IoTHubRegistryManager_Create shall do clean up and return IOTHUB_REGISTRYMANAGER_ERROR. ] */
                 LogError("Malloc failed for tempconfiguration");
                 result = IOTHUB_DEVICE_CONFIGURATION_ERROR;
             }
             else
             {
-                /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_011: [ IoTHubRegistryManager_CreateDevice shall set the "configurationId" value to the configurationCreate->configurationId ] */
-                /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_011: [ IoTHubRegistryManager_CreateDevice shall set the "targetCondition" value to the configurationCreate->targetCondition ] */
+                /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_011: [ IoTHubDeviceConfiguration_AddConfiguration shall set the "configurationId" value to the configurationCreate->configurationId ] */
+                /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_011: [ IoTHubDeviceConfiguration_AddConfiguration shall set the "targetCondition" value to the configurationCreate->targetCondition ] */
                 memset(tempConfigurationInfo, 0, sizeof(*tempConfigurationInfo));
                 tempConfigurationInfo->configurationId = configurationCreate->configurationId;
                 tempConfigurationInfo->targetCondition = configurationCreate->targetCondition;
@@ -1188,44 +1109,44 @@ IOTHUB_DEVICE_CONFIGURATION_RESULT IoTHubDeviceConfiguration_AddConfiguration(IO
                     result = IOTHUB_DEVICE_CONFIGURATION_ERROR;
                 }
 
-                /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_010: [ IoTHubRegistryManager_CreateDevice shall create a flat "key1:value2,key2:value2..." JSON representation from the given deviceOrModuleCreateInfo parameter using the following parson APIs: json_value_init_object, json_value_get_object, json_object_set_string, json_object_dotset_string ] */
+                /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_010: [ IoTHubDeviceConfiguration_AddConfiguration shall create a flat "key1:value2,key2:value2..." JSON representation from the given deviceOrModuleCreateInfo parameter using the following parson APIs: json_value_init_object, json_value_get_object, json_object_set_string, json_object_dotset_string ] */
                 if ((configurationJsonBuffer = createConfigurationPayloadJson(tempConfigurationInfo)) == NULL)
                 {
-                    /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_013: [ IoTHubRegistryManager_CreateDevice shall return IOTHUB_REGISTRYMANAGER_ERROR_CREATING_JSON if the JSON creation failed  ] */
+                    /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_013: [ IoTHubDeviceConfiguration_AddConfiguration shall return IOTHUB_REGISTRYMANAGER_ERROR_CREATING_JSON if the JSON creation failed  ] */
                     LogError("Json creation failed");
                     result = IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR;
                 }
-                /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_097: [ IoTHubRegistryManager_CreateDevice shall allocate memory for response buffer by calling BUFFER_new ] */
+                /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_097: [ IoTHubDeviceConfiguration_AddConfiguration shall allocate memory for response buffer by calling BUFFER_new ] */
                 else if ((responseBuffer = BUFFER_new()) == NULL)
                 {
-                    /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_098 : [ If the BUFFER_new fails, IoTHubRegistryManager_CreateDevice shall do clean up and return IOTHUB_REGISTRYMANAGER_ERROR. ] */
+                    /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_098 : [ If the BUFFER_new fails, IoTHubDeviceConfiguration_AddConfiguration shall do clean up and return IOTHUB_REGISTRYMANAGER_ERROR. ] */
                     LogError("BUFFER_new failed for responseBuffer");
                     result = IOTHUB_DEVICE_CONFIGURATION_ERROR;
                 }
-                /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_014: [ IoTHubRegistryManager_CreateDevice shall create an HTTP PUT request using the created JSON ] */
-                /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_015: [ IoTHubRegistryManager_CreateDevice shall create an HTTP PUT request using the following HTTP headers: authorization=sasToken,Request-Id=1001,Accept=application/json,Content-Type=application/json,charset=utf-8 ] */
-                /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_016: [ IoTHubRegistryManager_CreateDevice shall create an HTTPAPIEX_SAS_HANDLE handle by calling HTTPAPIEX_SAS_Create ] */
-                /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_017: [ IoTHubRegistryManager_CreateDevice shall create an HTTPAPIEX_HANDLE handle by calling HTTPAPIEX_Create ] */
-                /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_018: [ IoTHubRegistryManager_CreateDevice shall execute the HTTP PUT request by calling HTTPAPIEX_ExecuteRequest ] */
+                /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_014: [ IoTHubDeviceConfiguration_AddConfiguration shall create an HTTP PUT request using the created JSON ] */
+                /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_015: [ IoTHubDeviceConfiguration_AddConfiguration shall create an HTTP PUT request using the following HTTP headers: authorization=sasToken,Request-Id=1001,Accept=application/json,Content-Type=application/json,charset=utf-8 ] */
+                /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_016: [ IoTHubDeviceConfiguration_AddConfiguration shall create an HTTPAPIEX_SAS_HANDLE handle by calling HTTPAPIEX_SAS_Create ] */
+                /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_017: [ IoTHubDeviceConfiguration_AddConfiguration shall create an HTTPAPIEX_HANDLE handle by calling HTTPAPIEX_Create ] */
+                /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_018: [ IoTHubDeviceConfiguration_AddConfiguration shall execute the HTTP PUT request by calling HTTPAPIEX_ExecuteRequest ] */
                 else if ((result = sendHttpRequestDeviceConfiguration(serviceClientDeviceConfigurationHandle, IOTHUB_DEVICECONFIGURATION_REQUEST_ADD, tempConfigurationInfo->configurationId, configurationJsonBuffer, responseBuffer)) == IOTHUB_DEVICE_CONFIGURATION_ERROR)
                 {
-                    /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_019: [ If any of the HTTPAPI call fails IoTHubRegistryManager_CreateDevice shall fail and return IOTHUB_REGISTRYMANAGER_HTTPAPI_ERROR ] */
-                    /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_099: [ If any of the call fails during the HTTP creation IoTHubRegistryManager_CreateDevice shall fail and return IOTHUB_REGISTRYMANAGER_ERROR ] */
+                    /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_019: [ If any of the HTTPAPI call fails IoTHubDeviceConfiguration_AddConfiguration shall fail and return IOTHUB_REGISTRYMANAGER_HTTPAPI_ERROR ] */
+                    /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_099: [ If any of the call fails during the HTTP creation IoTHubDeviceConfiguration_AddConfiguration shall fail and return IOTHUB_REGISTRYMANAGER_ERROR ] */
                     LogError("Failure sending HTTP request for create device");
                 }
                 else if (result == IOTHUB_DEVICE_CONFIGURATION_OK)
                 {
-                    /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_022: [ IoTHubRegistryManager_CreateDevice shall verify the received HTTP status code and if it is less or equal than 300 then try to parse the response JSON to configuration ] */
-                    /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_023: [ If the JSON parsing failed, IoTHubRegistryManager_CreateDevice shall return IOTHUB_REGISTRYMANAGER_JSON_ERROR ] */
-                    /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_024: [ If the configuration out parameter is not NULL IoTHubRegistryManager_CreateDevice shall save the received configuration to the out parameter and return IOTHUB_REGISTRYMANAGER_OK ] */
+                    /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_022: [ IoTHubDeviceConfiguration_AddConfiguration shall verify the received HTTP status code and if it is less or equal than 300 then try to parse the response JSON to configuration ] */
+                    /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_023: [ If the JSON parsing failed, IoTHubDeviceConfiguration_AddConfiguration shall return IOTHUB_REGISTRYMANAGER_JSON_ERROR ] */
+                    /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_024: [ If the configuration out parameter is not NULL IoTHubDeviceConfiguration_AddConfiguration shall save the received configuration to the out parameter and return IOTHUB_REGISTRYMANAGER_OK ] */
                     result = parseDeviceConfigurationJson(responseBuffer, configuration);
                 }
                 else
                 {
-                    /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_020: [ IoTHubRegistryManager_CreateDevice shall verify the received HTTP status code and if it is 409 then return IOTHUB_REGISTRYMANAGER_DEVICE_EXIST ] */
+                    /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_020: [ IoTHubDeviceConfiguration_AddConfiguration shall verify the received HTTP status code and if it is 409 then return IOTHUB_REGISTRYMANAGER_DEVICE_EXIST ] */
                 }
 
-                /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_100: [ IoTHubRegistryManager_CreateDevice shall do clean up before return ] */
+                /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_100: [ IoTHubDeviceConfiguration_AddConfiguration shall do clean up before return ] */
                 if (responseBuffer != NULL)
                 {
                     BUFFER_delete(responseBuffer);
@@ -1246,7 +1167,7 @@ IOTHUB_DEVICE_CONFIGURATION_RESULT IoTHubDeviceConfiguration_UpdateConfiguration
 {
     IOTHUB_DEVICE_CONFIGURATION_RESULT result;
 
-    /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_007: [ IoTHubDeviceConfiguration_AddConfiguration shall verify the input parameters and if any of them are NULL then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ] */
+    /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_007: [ IoTHubDeviceConfiguration_UpdateConfiguration shall verify the input parameters and if any of them are NULL then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ] */
     if ((serviceClientDeviceConfigurationHandle == NULL) || (configuration == NULL))
     {
         LogError("Input parameter cannot be NULL");
@@ -1264,37 +1185,37 @@ IOTHUB_DEVICE_CONFIGURATION_RESULT IoTHubDeviceConfiguration_UpdateConfiguration
             BUFFER_HANDLE configurationJsonBuffer = NULL;
             BUFFER_HANDLE responseBuffer = NULL;
 
-            /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_010: [ IoTHubRegistryManager_CreateDevice shall create a flat "key1:value2,key2:value2..." JSON representation from the given deviceOrModuleCreateInfo parameter using the following parson APIs: json_value_init_object, json_value_get_object, json_object_set_string, json_object_dotset_string ] */
+            /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_010: [ IoTHubDeviceConfiguration_UpdateConfiguration shall create a flat "key1:value2,key2:value2..." JSON representation from the given deviceOrModuleCreateInfo parameter using the following parson APIs: json_value_init_object, json_value_get_object, json_object_set_string, json_object_dotset_string ] */
             if ((configurationJsonBuffer = createConfigurationPayloadJson(configuration)) == NULL)
             {
-                /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_013: [ IoTHubRegistryManager_CreateDevice shall return IOTHUB_REGISTRYMANAGER_ERROR_CREATING_JSON if the JSON creation failed  ] */
+                /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_013: [ IoTHubDeviceConfiguration_UpdateConfiguration shall return IOTHUB_REGISTRYMANAGER_ERROR_CREATING_JSON if the JSON creation failed  ] */
                 LogError("Json creation failed");
                 result = IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR;
             }
-            /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_097: [ IoTHubRegistryManager_CreateDevice shall allocate memory for response buffer by calling BUFFER_new ] */
+            /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_097: [ IoTHubDeviceConfiguration_UpdateConfiguration shall allocate memory for response buffer by calling BUFFER_new ] */
             else if ((responseBuffer = BUFFER_new()) == NULL)
             {
-                /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_098 : [ If the BUFFER_new fails, IoTHubRegistryManager_CreateDevice shall do clean up and return IOTHUB_REGISTRYMANAGER_ERROR. ] */
+                /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_098 : [ If the BUFFER_new fails, IoTHubDeviceConfiguration_UpdateConfiguration shall do clean up and return IOTHUB_REGISTRYMANAGER_ERROR. ] */
                 LogError("BUFFER_new failed for responseBuffer");
                 result = IOTHUB_DEVICE_CONFIGURATION_ERROR;
             }
-            /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_014: [ IoTHubRegistryManager_CreateDevice shall create an HTTP PUT request using the created JSON ] */
-            /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_015: [ IoTHubRegistryManager_CreateDevice shall create an HTTP PUT request using the following HTTP headers: authorization=sasToken,Request-Id=1001,Accept=application/json,Content-Type=application/json,charset=utf-8 ] */
-            /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_016: [ IoTHubRegistryManager_CreateDevice shall create an HTTPAPIEX_SAS_HANDLE handle by calling HTTPAPIEX_SAS_Create ] */
-            /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_017: [ IoTHubRegistryManager_CreateDevice shall create an HTTPAPIEX_HANDLE handle by calling HTTPAPIEX_Create ] */
-            /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_018: [ IoTHubRegistryManager_CreateDevice shall execute the HTTP PUT request by calling HTTPAPIEX_ExecuteRequest ] */
+            /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_014: [ IoTHubDeviceConfiguration_UpdateConfiguration shall create an HTTP PUT request using the created JSON ] */
+            /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_015: [ IoTHubDeviceConfiguration_UpdateConfiguration shall create an HTTP PUT request using the following HTTP headers: authorization=sasToken,Request-Id=1001,Accept=application/json,Content-Type=application/json,charset=utf-8 ] */
+            /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_016: [ IoTHubDeviceConfiguration_UpdateConfiguration shall create an HTTPAPIEX_SAS_HANDLE handle by calling HTTPAPIEX_SAS_Create ] */
+            /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_017: [ IoTHubDeviceConfiguration_UpdateConfiguration shall create an HTTPAPIEX_HANDLE handle by calling HTTPAPIEX_Create ] */
+            /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_018: [ IoTHubDeviceConfiguration_UpdateConfiguration shall execute the HTTP PUT request by calling HTTPAPIEX_ExecuteRequest ] */
             else if ((result = sendHttpRequestDeviceConfiguration(serviceClientDeviceConfigurationHandle, IOTHUB_DEVICECONFIGURATION_REQUEST_UPDATE, configuration->configurationId, configurationJsonBuffer, responseBuffer)) == IOTHUB_DEVICE_CONFIGURATION_ERROR)
             {
-                /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_019: [ If any of the HTTPAPI call fails IoTHubRegistryManager_CreateDevice shall fail and return IOTHUB_REGISTRYMANAGER_HTTPAPI_ERROR ] */
-                /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_099: [ If any of the call fails during the HTTP creation IoTHubRegistryManager_CreateDevice shall fail and return IOTHUB_REGISTRYMANAGER_ERROR ] */
+                /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_019: [ If any of the HTTPAPI call fails IoTHubDeviceConfiguration_UpdateConfiguration shall fail and return IOTHUB_REGISTRYMANAGER_HTTPAPI_ERROR ] */
+                /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_099: [ If any of the call fails during the HTTP creation IoTHubDeviceConfiguration_UpdateConfiguration shall fail and return IOTHUB_REGISTRYMANAGER_ERROR ] */
                 LogError("Failure sending HTTP request for update device");
             }
             else
             {
-                /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_020: [ IoTHubRegistryManager_CreateDevice shall verify the received HTTP status code and if it is 409 then return IOTHUB_REGISTRYMANAGER_DEVICE_EXIST ] */
+                /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_020: [ IoTHubDeviceConfiguration_UpdateConfiguration shall verify the received HTTP status code and if it is 409 then return IOTHUB_REGISTRYMANAGER_DEVICE_EXIST ] */
             }
 
-            /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_100: [ IoTHubRegistryManager_CreateDevice shall do clean up before return ] */
+            /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_100: [ IoTHubDeviceConfiguration_UpdateConfiguration shall do clean up before return ] */
             if (responseBuffer != NULL)
             {
                 BUFFER_delete(responseBuffer);

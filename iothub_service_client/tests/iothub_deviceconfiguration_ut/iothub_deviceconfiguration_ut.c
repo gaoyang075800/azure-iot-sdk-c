@@ -81,6 +81,13 @@ MOCKABLE_FUNCTION(, JSON_Value*, json_object_dotget_value, const JSON_Object *, 
 MOCKABLE_FUNCTION(, JSON_Status, json_object_set_value, JSON_Object *, object, const char *, name, JSON_Value *, value);
 MOCKABLE_FUNCTION(, JSON_Status, json_object_set_number, JSON_Object *, object, const char *, name, double, number);
 
+MOCKABLE_FUNCTION(, double, json_object_dotget_number, const JSON_Object *, object, const char *, name);
+MOCKABLE_FUNCTION(, size_t, json_object_get_count, const JSON_Object *, object);
+MOCKABLE_FUNCTION(, const char *, json_object_get_name, const JSON_Object *, object, size_t, index);
+MOCKABLE_FUNCTION(, JSON_Value *, json_object_get_value_at, const JSON_Object *, object, size_t, index);
+MOCKABLE_FUNCTION(, int, json_object_has_value, const JSON_Object *, object, const char *, name);
+MOCKABLE_FUNCTION(, const char *, json_value_get_string, const JSON_Value *, value);
+
 #undef ENABLE_MOCKS
 
 #include "azure_c_shared_utility/strings.h"
