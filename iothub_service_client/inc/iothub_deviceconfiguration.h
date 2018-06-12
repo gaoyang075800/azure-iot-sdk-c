@@ -40,7 +40,7 @@ typedef struct IOTHUB_DEVICE_CONFIGURATION_METRICS_RESULTS_TAG
 {
     size_t numQueries;
     const char** queryNames;
-    const void* results;
+    double* results;
 } IOTHUB_DEVICE_CONFIGURATION_METRICS_RESULT;
 
 typedef struct IOTHUB_DEVICE_CONFIGURATION_METRICS_DEFINITION_TAG
