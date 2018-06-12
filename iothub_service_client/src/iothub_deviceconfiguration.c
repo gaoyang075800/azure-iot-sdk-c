@@ -302,7 +302,7 @@ static IOTHUB_DEVICE_CONFIGURATION_RESULT sendHttpRequestDeviceConfiguration(IOT
             else
             {
                 STRING_delete(relativePath);
-                if (statusCode == 200)
+                if (statusCode == 204)
                 {
                     /*CodesSRS_IOTHUBDEVICECONFIGURATION_01_030: [ Otherwise IoTHubDeviceConfiguration_GetConfiguration shall save the received deviceConfiguration to the out parameter and return with it ]*/
                     result = IOTHUB_DEVICE_CONFIGURATION_OK;
