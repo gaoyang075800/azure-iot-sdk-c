@@ -542,16 +542,8 @@ static IOTHUB_DEVICE_CONFIGURATION_RESULT parseDeviceConfigurationMetricsJsonObj
         LogError("metricResults or metricQueries cannot be NULL");
         result = IOTHUB_DEVICE_CONFIGURATION_INVALID_ARG;
     }
-    else if (metricResultsCount != metricQueriesCount)
-    {
-        /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_023: [ If the JSON parsing failed, IoTHubDeviceConfiguration_AddConfiguration shall return IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR ] */
-        /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_035: [ If the JSON parsing failed, IoTHubDeviceConfiguration_GetConfiguration shall return IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR ] */
-        LogError("metricResults and metricQueries should have same count (greater than zero)");
-        result = IOTHUB_DEVICE_CONFIGURATION_INVALID_ARG;
-    }
     else
     {
-        results = malloc(sizeof(IOTHUB_DEVICE_CONFIGURATION_METRICS_RESULT));
         if (results == NULL)
         {
             /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_002: [ If the allocation failed, IoTHubDeviceConfiguration_Create shall return NULL ]*/
@@ -560,7 +552,6 @@ static IOTHUB_DEVICE_CONFIGURATION_RESULT parseDeviceConfigurationMetricsJsonObj
         }
         else
         {
-            queries = malloc(sizeof(IOTHUB_DEVICE_CONFIGURATION_METRICS_DEFINITION));
             if (queries == NULL)
             {
                 /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_002: [ If the allocation failed, IoTHubDeviceConfiguration_Create shall return NULL ]*/
@@ -569,28 +560,16 @@ static IOTHUB_DEVICE_CONFIGURATION_RESULT parseDeviceConfigurationMetricsJsonObj
             }
             else
             {
-                results->numQueries = metricQueriesCount;
-                if (metricQueriesCount > 0)
+                results->numQueries = metricResultsCount;
+                if (metricResultsCount > 0)
                 {
-                    if ((results->queryNames = malloc(sizeof(const char*) * metricQueriesCount))== NULL)
+                    if ((results->queryNames = malloc(sizeof(const char*) * metricResultsCount)) == NULL)
                     {
                         /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_002: [ If the allocation failed, IoTHubDeviceConfiguration_Create shall return NULL ]*/
                         LogError("Malloc failed for IOTHUB_DEVICE_CONFIGURATION_METRICS_RESULT queryNames");
                         result = IOTHUB_DEVICE_CONFIGURATION_ERROR;
                     }
-                    else if((queries->queryNames = malloc(sizeof(const char*) * metricQueriesCount)) == NULL)
-                    {
-                        /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_002: [ If the allocation failed, IoTHubDeviceConfiguration_Create shall return NULL ]*/
-                        LogError("Malloc failed for IOTHUB_DEVICE_CONFIGURATION_METRICS_DEFINITION queryNames");
-                        result = IOTHUB_DEVICE_CONFIGURATION_ERROR;
-                    }
-                    else if((queries->queryStrings = malloc(sizeof(const char*) * metricQueriesCount)) == NULL)
-                    {
-                        /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_002: [ If the allocation failed, IoTHubDeviceConfiguration_Create shall return NULL ]*/
-                        LogError("Malloc failed for IOTHUB_DEVICE_CONFIGURATION_METRICS_DEFINITION queryStrings");
-                        result = IOTHUB_DEVICE_CONFIGURATION_ERROR;
-                    }
-                    else if((results->results = malloc(sizeof(double) * metricQueriesCount)) == NULL)
+                    else if((results->results = malloc(sizeof(double) * metricResultsCount)) == NULL)
                     {
                         /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_002: [ If the allocation failed, IoTHubDeviceConfiguration_Create shall return NULL ]*/
                         LogError("Malloc failed for IOTHUB_DEVICE_CONFIGURATION_METRICS_RESULT results");
@@ -598,9 +577,9 @@ static IOTHUB_DEVICE_CONFIGURATION_RESULT parseDeviceConfigurationMetricsJsonObj
                     }
                     else
                     {        
-                        for (size_t i = 0; i < metricQueriesCount; i++)
+                        for (size_t i = 0; i < metricResultsCount; i++)
                         {
-                            if ((tempMetricQueryName = STRING_construct(json_object_get_name(metricQueries, i))) == NULL)
+                            if ((tempMetricQueryName = STRING_construct(json_object_get_name(metricResults, i))) == NULL)
                             {
                                 /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_024: [ If any of the HTTPAPI call fails IoTHubDeviceConfiguration_GetConfiguration shall fail and return NULL ]*/
                                 LogError("STRING_construct failed for tempMetricQueryName");
@@ -620,14 +599,7 @@ static IOTHUB_DEVICE_CONFIGURATION_RESULT parseDeviceConfigurationMetricsJsonObj
                                 LogError("mallocAndStrcpy_s failed for results tempMetricQueryName");
                                 result = IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR;
                             }
-                            else if (mallocAndStrcpy_s((char**)&(queries->queryNames[i]), STRING_c_str(tempMetricQueryName)) != 0)
-                            {
-                                /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_023: [ If the JSON parsing failed, IoTHubDeviceConfiguration_AddConfiguration shall return IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR ] */
-                                /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_035: [ If the JSON parsing failed, IoTHubDeviceConfiguration_GetConfiguration shall return IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR ] */
-                                LogError("mallocAndStrcpy_s failed for queries tempMetricQueryName");
-                                result = IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR;
-                            }
-                            else if ((tempMetricQueryString = STRING_construct(json_value_get_string(json_object_get_value_at(metricQueries, i)))) == NULL)
+                            else if ((tempMetricQueryString = STRING_construct(json_value_get_string(json_object_get_value_at(metricResults, i)))) == NULL)
                             {
                                 /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_024: [ If any of the HTTPAPI call fails IoTHubDeviceConfiguration_GetConfiguration shall fail and return NULL ]*/
                                 LogError("STRING_construct failed for tempMetricQueryString");
@@ -648,6 +620,59 @@ static IOTHUB_DEVICE_CONFIGURATION_RESULT parseDeviceConfigurationMetricsJsonObj
                         }
                     }
                 }
+
+				queries->numQueries = metricQueriesCount;
+				if (metricQueriesCount > 0)
+				{
+                    if((queries->queryNames = malloc(sizeof(const char*) * metricQueriesCount)) == NULL)
+                    {
+                        /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_002: [ If the allocation failed, IoTHubDeviceConfiguration_Create shall return NULL ]*/
+                        LogError("Malloc failed for IOTHUB_DEVICE_CONFIGURATION_METRICS_DEFINITION queryNames");
+                        result = IOTHUB_DEVICE_CONFIGURATION_ERROR;
+                    }
+                    else if((queries->queryStrings = malloc(sizeof(const char*) * metricQueriesCount)) == NULL)
+                    {
+                        /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_002: [ If the allocation failed, IoTHubDeviceConfiguration_Create shall return NULL ]*/
+                        LogError("Malloc failed for IOTHUB_DEVICE_CONFIGURATION_METRICS_DEFINITION queryStrings");
+                        result = IOTHUB_DEVICE_CONFIGURATION_ERROR;
+                    }
+					for (size_t i = 0; i < metricQueriesCount; i++)
+					{
+						if ((tempMetricQueryName = STRING_construct(json_object_get_name(metricQueries, i))) == NULL)
+						{
+							/*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_024: [ If any of the HTTPAPI call fails IoTHubDeviceConfiguration_GetConfiguration shall fail and return NULL ]*/
+							LogError("STRING_construct failed for tempMetricQueryName");
+							result = IOTHUB_DEVICE_CONFIGURATION_ERROR;
+						}
+						else if (!json_object_has_value(metricQueries, STRING_c_str(tempMetricQueryName)))
+						{
+							/*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_023: [ If the JSON parsing failed, IoTHubDeviceConfiguration_AddConfiguration shall return IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR ] */
+							/*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_035: [ If the JSON parsing failed, IoTHubDeviceConfiguration_GetConfiguration shall return IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR ] */
+							LogError("missing result for query %s", tempMetricQueryName);
+							result = IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR;
+						}
+						else if (mallocAndStrcpy_s((char**)&(queries->queryNames[i]), STRING_c_str(tempMetricQueryName)) != 0)
+						{
+							/*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_023: [ If the JSON parsing failed, IoTHubDeviceConfiguration_AddConfiguration shall return IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR ] */
+							/*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_035: [ If the JSON parsing failed, IoTHubDeviceConfiguration_GetConfiguration shall return IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR ] */
+							LogError("mallocAndStrcpy_s failed for queries tempMetricQueryName");
+							result = IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR;
+						}
+						else if ((tempMetricQueryString = STRING_construct(json_value_get_string(json_object_get_value_at(metricQueries, i)))) == NULL)
+						{
+							/*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_024: [ If any of the HTTPAPI call fails IoTHubDeviceConfiguration_GetConfiguration shall fail and return NULL ]*/
+							LogError("STRING_construct failed for tempMetricQueryString");
+							result = IOTHUB_DEVICE_CONFIGURATION_ERROR;
+						}
+						else if (mallocAndStrcpy_s((char**)&(queries->queryStrings[i]), STRING_c_str(tempMetricQueryString)) != 0)
+						{
+							/*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_023: [ If the JSON parsing failed, IoTHubDeviceConfiguration_AddConfiguration shall return IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR ] */
+							/*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_035: [ If the JSON parsing failed, IoTHubDeviceConfiguration_GetConfiguration shall return IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR ] */
+							LogError("mallocAndStrcpy_s failed for tempMetricQueryString");
+							result = IOTHUB_DEVICE_CONFIGURATION_JSON_ERROR;
+						}
+					}
+				}
             }
 
             result = IOTHUB_DEVICE_CONFIGURATION_OK;
@@ -979,7 +1004,6 @@ IOTHUB_DEVICE_CONFIGURATION_RESULT IoTHubDeviceConfiguration_GetConfiguration(IO
     }
     else
     {
-        configuration = malloc(sizeof(IOTHUB_DEVICE_CONFIGURATION));
         initializeDeviceConfigurationMembers(configuration);
 
         BUFFER_HANDLE responseBuffer;

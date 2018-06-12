@@ -17,8 +17,6 @@ static const char* updatedTargetCondition = "tags.Environment='test'";
 static const char* deviceContent = "{\"properties.desired.settings1\": {\"c\": 3, \"d\" : 4}, \"properties.desired.settings2\" : \"xyz\"}";
 static const char* modulesContent = "{\"sunny\": {\"properties.desired\": {\"temperature\": 69,\"humidity\": 30}},\"goolily\": {\"properties.desired\": {\"elevation\": 45,\"orientation\": \"NE\"}},\"$edgeAgent\": {\"properties.desired\": {\"schemaVersion\": \"1.0\",\"runtime\": {\"type\": \"docker\",\"settings\": {\"minDockerVersion\": \"1.5\",\"loggingOptions\": \"\"}},\"systemModules\": {\"edgeAgent\": {\"type\": \"docker\",\"settings\": {\"image\": \"edgeAgent\",\"createOptions\": \"\"},\"configuration\": {\"id\": \"configurationapplyedgeagentreportinge2etestcit-config-a9ed4811-1b57-48bf-8af2-02319a38de01\"}},\"edgeHub\": {\"type\": \"docker\",\"status\": \"running\",\"restartPolicy\": \"always\",\"settings\": {\"image\": \"edgeHub\",\"createOptions\": \"\"},\"configuration\": {\"id\": \"configurationapplyedgeagentreportinge2etestcit-config-a9ed4811-1b57-48bf-8af2-02319a38de01\"}}},\"modules\": {\"sunny\": {\"version\": \"1.0\",\"type\": \"docker\",\"status\": \"running\",\"restartPolicy\": \"on-failure\",\"settings\": {\"image\": \"mongo\",\"createOptions\": \"\"},\"configuration\": {\"id\": \"configurationapplyedgeagentreportinge2etestcit-config-a9ed4811-1b57-48bf-8af2-02319a38de01\"}},\"goolily\": {\"version\": \"1.0\",\"type\": \"docker\",\"status\": \"running\",\"restartPolicy\": \"on-failure\",\"settings\": {\"image\": \"asa\",\"createOptions\": \"\"},\"configuration\": {\"id\": \"configurationapplyedgeagentreportinge2etestcit-config-a9ed4811-1b57-48bf-8af2-02319a38de01\"}}}}},\"$edgeHub\": {\"properties.desired\": {\"schemaVersion\": \"1.0\",\"routes\": {\"route1\": \"from * INTO $upstream\"},\"storeAndForwardConfiguration\": {\"timeToLiveSecs\": 20}}}}";
 
-
-
 int main(void)
 {
     (void)platform_init();
@@ -57,6 +55,8 @@ int main(void)
         deviceConfigurationAddInfo.labels = deviceConfigurationAddInfoLabels;
         deviceConfigurationAddInfo.priority = 10;
         deviceConfigurationAddInfo.version = IOTHUB_DEVICE_CONFIGURATION_ADD_VERSION_1;
+
+        (void)memset(&deviceConfigurationInfo, 0, sizeof(IOTHUB_DEVICE_CONFIGURATION));
 
         result = IoTHubDeviceConfiguration_AddConfiguration(iotHubDeviceConfigurationHandle, &deviceConfigurationAddInfo, &deviceConfigurationInfo);
         if (result == IOTHUB_DEVICE_CONFIGURATION_OK)
@@ -100,7 +100,6 @@ int main(void)
 
         // Get configuration
 
-        (void)memset(&deviceConfigurationInfo, 0, sizeof(IOTHUB_DEVICE_CONFIGURATION));
 
         result = IoTHubDeviceConfiguration_GetConfiguration(iotHubDeviceConfigurationHandle, deviceConfigurationAddInfo.configurationId, &deviceConfigurationInfo);
         if (result == IOTHUB_DEVICE_CONFIGURATION_OK)
