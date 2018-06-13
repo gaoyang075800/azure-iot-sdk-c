@@ -55,6 +55,7 @@ static int my_mallocAndStrcpy_s(char** destination, const char* source)
 #include "azure_c_shared_utility/httpapiex.h"
 #include "azure_c_shared_utility/httpapiexsas.h"
 #include "azure_c_shared_utility/uniqueid.h"
+#include "azure_c_shared_utility/singlylinkedlist.h"
 #include "parson.h"
 
 MOCKABLE_FUNCTION(, JSON_Value*, json_parse_string, const char *, string);
@@ -207,6 +208,140 @@ void my_json_value_free(JSON_Value *value)
     my_gballoc_free(value);
 }
 
+typedef struct LIST_ITEM_INSTANCE_TAG
+{
+    const void* item;
+    void* next;
+} LIST_ITEM_INSTANCE;
+
+typedef struct SINGLYLINKEDLIST_INSTANCE_TAG
+{
+    LIST_ITEM_INSTANCE* head;
+} LIST_INSTANCE;
+
+static SINGLYLINKEDLIST_HANDLE my_list_create(void)
+{
+    LIST_INSTANCE* result;
+
+    result = (LIST_INSTANCE*)malloc(sizeof(LIST_INSTANCE));
+    if (result != NULL)
+    {
+        result->head = NULL;
+    }
+
+    return result;
+}
+
+static void my_list_destroy(SINGLYLINKEDLIST_HANDLE list)
+{
+    if (list != NULL)
+    {
+        LIST_INSTANCE* list_instance = (LIST_INSTANCE*)list;
+
+        while (list_instance->head != NULL)
+        {
+            LIST_ITEM_INSTANCE* current_item = list_instance->head;
+            list_instance->head = (LIST_ITEM_INSTANCE*)current_item->next;
+            free(current_item);
+        }
+
+        free(list_instance);
+    }
+}
+
+static LIST_ITEM_HANDLE my_list_add(SINGLYLINKEDLIST_HANDLE list, const void* item)
+{
+    LIST_ITEM_INSTANCE* result;
+
+    if ((list == NULL) ||
+        (item == NULL))
+    {
+        result = NULL;
+    }
+    else
+    {
+        LIST_INSTANCE* list_instance = (LIST_INSTANCE*)list;
+        result = (LIST_ITEM_INSTANCE*)malloc(sizeof(LIST_ITEM_INSTANCE));
+
+        if (result == NULL)
+        {
+            result = NULL;
+        }
+        else
+        {
+            result->next = NULL;
+            result->item = item;
+
+            if (list_instance->head == NULL)
+            {
+                list_instance->head = result;
+            }
+            else
+            {
+                LIST_ITEM_INSTANCE* current = list_instance->head;
+                while (current->next != NULL)
+                {
+                    current = (LIST_ITEM_INSTANCE*)current->next;
+                }
+
+                current->next = result;
+            }
+        }
+    }
+
+    return result;
+}
+
+static LIST_ITEM_HANDLE my_list_get_head_item(SINGLYLINKEDLIST_HANDLE list)
+{
+    LIST_ITEM_HANDLE result;
+
+    if (list == NULL)
+    {
+        result = NULL;
+    }
+    else
+    {
+        LIST_INSTANCE* list_instance = (LIST_INSTANCE*)list;
+
+        result = list_instance->head;
+    }
+
+    return result;
+}
+
+static LIST_ITEM_HANDLE my_list_get_next_item(LIST_ITEM_HANDLE item_handle)
+{
+    LIST_ITEM_HANDLE result;
+
+    if (item_handle == NULL)
+    {
+        result = NULL;
+    }
+    else
+    {
+        result = (LIST_ITEM_HANDLE)((LIST_ITEM_INSTANCE*)item_handle)->next;
+    }
+
+    return result;
+}
+
+static const void* my_list_item_get_value(LIST_ITEM_HANDLE item_handle)
+{
+    const void* result;
+
+    if (item_handle == NULL)
+    {
+        result = NULL;
+    }
+    else
+    {
+        result = ((LIST_ITEM_INSTANCE*)item_handle)->item;
+    }
+
+    return result;
+}
+
 #include "iothub_deviceconfiguration.h"
 #include "iothub_service_client_auth.h"
 
@@ -252,6 +387,7 @@ static char* TEST_SHAREDACCESSKEYNAME = "theSharedAccessKeyName";
 static const HTTP_HEADERS_HANDLE TEST_HTTP_HEADERS_HANDLE = (HTTP_HEADERS_HANDLE)0x4545;
 
 static const unsigned int httpStatusCodeOk = 200;
+static const unsigned int httpStatusCodeDeleted = 204;
 static const unsigned int httpStatusCodeBadRequest = 400;
 
 static const char* TEST_CONFIGURATION_JSON_KEY_CONFIGURATION_ID = "id";
@@ -450,6 +586,22 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
 
 	REGISTER_GLOBAL_MOCK_RETURN(json_object_dotget_value, TEST_JSON_VALUE);
 	REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_object_dotget_value, NULL);
+
+    REGISTER_GLOBAL_MOCK_HOOK(singlylinkedlist_create, my_list_create);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(singlylinkedlist_create, NULL);
+
+    REGISTER_GLOBAL_MOCK_HOOK(singlylinkedlist_add, my_list_add);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(singlylinkedlist_add, NULL);
+
+    REGISTER_GLOBAL_MOCK_HOOK(singlylinkedlist_get_head_item, my_list_get_head_item);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(singlylinkedlist_get_head_item, NULL);
+
+    REGISTER_GLOBAL_MOCK_HOOK(singlylinkedlist_get_next_item, my_list_get_next_item);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(singlylinkedlist_get_next_item, NULL);
+
+    REGISTER_GLOBAL_MOCK_HOOK(singlylinkedlist_item_get_value, my_list_item_get_value);
+
+    REGISTER_GLOBAL_MOCK_HOOK(singlylinkedlist_destroy, my_list_destroy);
 }
 
 TEST_SUITE_CLEANUP(TestClassCleanup)
@@ -925,7 +1077,7 @@ TEST_FUNCTION(IoTHubDeviceConfiguration_DeleteConfiguration_happy_path)
 
 	umock_c_reset_all_calls();
 	
-	set_expected_calls_for_sendHttpRequestDeviceConfiguration(httpStatusCodeOk, HTTPAPI_REQUEST_DELETE);
+	set_expected_calls_for_sendHttpRequestDeviceConfiguration(httpStatusCodeDeleted, HTTPAPI_REQUEST_DELETE);
 
 	///act
 	IOTHUB_DEVICE_CONFIGURATION_RESULT result = IoTHubDeviceConfiguration_DeleteConfiguration(handle, TEST_CONST_CHAR_PTR);
