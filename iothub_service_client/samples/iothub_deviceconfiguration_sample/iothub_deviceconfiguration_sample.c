@@ -14,9 +14,10 @@ static const char* connectionString = "[Hub connection string]";
 static const char* configurationId = "[New configuration id]";
 static const char* targetCondition = "tags.UniqueTag='configurationapplyedgeagentreportinge2etestcita5b4e2b7f6464fe9988feea7d887584a' and tags.Environment='test'";
 static const char* updatedTargetCondition = "tags.Environment='test'";
-static const char* deviceContent = "{\"properties.desired.settings1\": {\"c\": 3, \"d\" : 4}, \"properties.desired.settings2\" : \"xyz\"}";
-//static const char* modulesContent = "{\"sunny\": {\"properties.desired\": {\"temperature\": 69,\"humidity\": 30}},\"goolily\": {\"properties.desired\": {\"elevation\": 45,\"orientation\": \"NE\"}},\"$edgeAgent\": {\"properties.desired\": {\"schemaVersion\": \"1.0\",\"runtime\": {\"type\": \"docker\",\"settings\": {\"minDockerVersion\": \"1.5\",\"loggingOptions\": \"\"}},\"systemModules\": {\"edgeAgent\": {\"type\": \"docker\",\"settings\": {\"image\": \"edgeAgent\",\"createOptions\": \"\"},\"configuration\": {\"id\": \"configurationapplyedgeagentreportinge2etestcit-config-a9ed4811-1b57-48bf-8af2-02319a38de01\"}},\"edgeHub\": {\"type\": \"docker\",\"status\": \"running\",\"restartPolicy\": \"always\",\"settings\": {\"image\": \"edgeHub\",\"createOptions\": \"\"},\"configuration\": {\"id\": \"configurationapplyedgeagentreportinge2etestcit-config-a9ed4811-1b57-48bf-8af2-02319a38de01\"}}},\"modules\": {\"sunny\": {\"version\": \"1.0\",\"type\": \"docker\",\"status\": \"running\",\"restartPolicy\": \"on-failure\",\"settings\": {\"image\": \"mongo\",\"createOptions\": \"\"},\"configuration\": {\"id\": \"configurationapplyedgeagentreportinge2etestcit-config-a9ed4811-1b57-48bf-8af2-02319a38de01\"}},\"goolily\": {\"version\": \"1.0\",\"type\": \"docker\",\"status\": \"running\",\"restartPolicy\": \"on-failure\",\"settings\": {\"image\": \"asa\",\"createOptions\": \"\"},\"configuration\": {\"id\": \"configurationapplyedgeagentreportinge2etestcit-config-a9ed4811-1b57-48bf-8af2-02319a38de01\"}}}}},\"$edgeHub\": {\"properties.desired\": {\"schemaVersion\": \"1.0\",\"routes\": {\"route1\": \"from * INTO $upstream\"},\"storeAndForwardConfiguration\": {\"timeToLiveSecs\": 20}}}}";
-static const char* modulesContent = "";
+//static const char* deviceContent = "{\"properties.desired.settings1\": {\"c\": 3, \"d\" : 4}, \"properties.desired.settings2\" : \"xyz\"}";
+static const char* modulesContent = "{\"sunny\": {\"properties.desired\": {\"temperature\": 69,\"humidity\": 30}},\"goolily\": {\"properties.desired\": {\"elevation\": 45,\"orientation\": \"NE\"}},\"$edgeAgent\": {\"properties.desired\": {\"schemaVersion\": \"1.0\",\"runtime\": {\"type\": \"docker\",\"settings\": {\"minDockerVersion\": \"1.5\",\"loggingOptions\": \"\"}},\"systemModules\": {\"edgeAgent\": {\"type\": \"docker\",\"settings\": {\"image\": \"edgeAgent\",\"createOptions\": \"\"},\"configuration\": {\"id\": \"configurationapplyedgeagentreportinge2etestcit-config-a9ed4811-1b57-48bf-8af2-02319a38de01\"}},\"edgeHub\": {\"type\": \"docker\",\"status\": \"running\",\"restartPolicy\": \"always\",\"settings\": {\"image\": \"edgeHub\",\"createOptions\": \"\"},\"configuration\": {\"id\": \"configurationapplyedgeagentreportinge2etestcit-config-a9ed4811-1b57-48bf-8af2-02319a38de01\"}}},\"modules\": {\"sunny\": {\"version\": \"1.0\",\"type\": \"docker\",\"status\": \"running\",\"restartPolicy\": \"on-failure\",\"settings\": {\"image\": \"mongo\",\"createOptions\": \"\"},\"configuration\": {\"id\": \"configurationapplyedgeagentreportinge2etestcit-config-a9ed4811-1b57-48bf-8af2-02319a38de01\"}},\"goolily\": {\"version\": \"1.0\",\"type\": \"docker\",\"status\": \"running\",\"restartPolicy\": \"on-failure\",\"settings\": {\"image\": \"asa\",\"createOptions\": \"\"},\"configuration\": {\"id\": \"configurationapplyedgeagentreportinge2etestcit-config-a9ed4811-1b57-48bf-8af2-02319a38de01\"}}}}},\"$edgeHub\": {\"properties.desired\": {\"schemaVersion\": \"1.0\",\"routes\": {\"route1\": \"from * INTO $upstream\"},\"storeAndForwardConfiguration\": {\"timeToLiveSecs\": 20}}}}";
+static const char* deviceContent = "";
+//static const char* modulesContent = "";
 
 static void printNameValuePairs_char(size_t count, const char** names, const char** values)
 {
@@ -24,7 +25,7 @@ static void printNameValuePairs_char(size_t count, const char** names, const cha
 
     for (i = 0; i < count; i++)
     {
-        (void)printf("\t\t%s %s\n", names[i], values[i]);
+        (void)printf("\t\t%s:  %s\n", names[i], values[i]);
     }
 }
 
@@ -34,7 +35,7 @@ static void printNameValuePairs_double(size_t count, const char** names, double*
 
     for (i = 0; i < count; i++)
     {
-        (void)printf("\t\t%s %f\n", names[i], values[i]);
+        (void)printf("\t\t%s:  %f\n", names[i], values[i]);
     }
 }
 
@@ -55,18 +56,23 @@ static void printDeviceInfo(const void* item, const void* action_context, bool* 
     (void)printf("    eTag                   : %s\n", configuration->eTag);
     (void)printf("    priority               : %d\n", configuration->priority);
 
-    (void)printf("    Labels                         :\n");
+    (void)printf("    Labels        :\n");
     printNameValuePairs_char(configuration->labels.numLabels, configuration->labels.labelName, configuration->labels.labelValue);
-    (void)printf("    Configuration content          :\n");
-    (void)printf("    Configuration system metrics   :\n");
-    (void)printf("    \tDefinitions  :\n");
+
+    (void)printf("    Configuration content        :\n");
+    if (configuration->content.deviceContent != NULL) (void)printf("    \tDevice content        : %s\n", configuration->content.deviceContent);
+    if (configuration->content.modulesContent != NULL) (void)printf("    \tModules content        :%s\n", configuration->content.modulesContent);
+
+    (void)printf("    Configuration system metrics        :\n");
+    (void)printf("    \tDefinitions        :\n");
     printNameValuePairs_char(configuration->systemMetricsDefinition.numQueries, configuration->systemMetricsDefinition.queryNames, (char **)configuration->systemMetricsDefinition.queryStrings);
-    (void)printf("    \tResults  :\n");
+    (void)printf("    \tResults        :\n");
     printNameValuePairs_double(configuration->systemMetricsResult.numQueries, configuration->systemMetricsResult.queryNames, (double *)configuration->systemMetricsResult.results);
-    (void)printf("    Configuration custom metrics   :\n");
-    (void)printf("    \tDefinitions  :\n");
+
+    (void)printf("    Configuration custom metrics        :\n");
+    (void)printf("    \tDefinitions        :\n");
     printNameValuePairs_char(configuration->metricsDefinition.numQueries, configuration->metricsDefinition.queryNames, (char **)configuration->metricsDefinition.queryStrings);
-    (void)printf("    \tResults  :\n");
+    (void)printf("    \tResults        :\n");
     printNameValuePairs_double(configuration->metricResult.numQueries, configuration->metricResult.queryNames, (double *)configuration->metricResult.results);
 
     *continue_processing = true;
@@ -113,35 +119,17 @@ int main(void)
 
         (void)memset(&deviceConfigurationInfo, 0, sizeof(IOTHUB_DEVICE_CONFIGURATION));
 
-        result = IoTHubDeviceConfiguration_AddConfiguration(iotHubDeviceConfigurationHandle, &deviceConfigurationAddInfo, &deviceConfigurationInfo);
-        if (result == IOTHUB_DEVICE_CONFIGURATION_OK)
+        if ((result = IoTHubDeviceConfiguration_AddConfiguration(iotHubDeviceConfigurationHandle, &deviceConfigurationAddInfo, &deviceConfigurationInfo)) != IOTHUB_DEVICE_CONFIGURATION_OK)
         {
-
-        }
-        else if (result == IOTHUB_DEVICE_CONFIGURATION_CONFIGURATION_EXIST)
-        {
-
-        }
-        else if (result == IOTHUB_DEVICE_CONFIGURATION_ERROR)
-        {
-
+            (void)printf("IoTHubDeviceConfiguration_AddConfiguration failed\r\n");
         }
 
         Map_Destroy(labels);
 
         // Get configuration
-        result = IoTHubDeviceConfiguration_GetConfiguration(iotHubDeviceConfigurationHandle, deviceConfigurationAddInfo.configurationId, &deviceConfigurationInfo);
-        if (result == IOTHUB_DEVICE_CONFIGURATION_OK)
+        if ((result = IoTHubDeviceConfiguration_GetConfiguration(iotHubDeviceConfigurationHandle, deviceConfigurationAddInfo.configurationId, &deviceConfigurationInfo)) != IOTHUB_DEVICE_CONFIGURATION_OK)
         {
-
-        }
-        else if (result == IOTHUB_DEVICE_CONFIGURATION_CONFIGURATION_NOT_EXIST)
-        {
-
-        }
-        else if (result == IOTHUB_DEVICE_CONFIGURATION_ERROR)
-        {
-
+            (void)printf("IoTHubDeviceConfiguration_GetConfiguration failed\r\n");
         }
 
         // Update configuration
@@ -149,58 +137,31 @@ int main(void)
         deviceConfigurationInfo.targetCondition = updatedTargetCondition;
         deviceConfigurationInfo.version = IOTHUB_DEVICE_CONFIGURATION_UPDATE_VERSION_1;
 
-        result = IoTHubDeviceConfiguration_UpdateConfiguration(iotHubDeviceConfigurationHandle, &deviceConfigurationInfo);
-        if (result == IOTHUB_DEVICE_CONFIGURATION_OK)
+        if ((result = IoTHubDeviceConfiguration_UpdateConfiguration(iotHubDeviceConfigurationHandle, &deviceConfigurationInfo)) != IOTHUB_DEVICE_CONFIGURATION_OK)
         {
-
+            (void)printf("IoTHubDeviceConfiguration_UpdateConfiguration failed\r\n");
         }
-        else if (result == IOTHUB_DEVICE_CONFIGURATION_CONFIGURATION_NOT_EXIST)
-        {
-
-        }
-        else if (result == IOTHUB_DEVICE_CONFIGURATION_ERROR)
-        {
-
-        }
-        //IoTHubDeviceConfiguration_FreeConfigurationMembers(&deviceConfigurationInfo);
-
-		SINGLYLINKEDLIST_HANDLE temp_list;
+        
+        SINGLYLINKEDLIST_HANDLE temp_list;
 
 		if ((temp_list = singlylinkedlist_create()) == NULL)
 		{
-			//skip this work
+            (void)printf("singlylinkedlist_create failed. skip IoTHubDeviceConfiguration_GetConfigurations\r\n");
 		}
 		else
 		{
-			result = IoTHubDeviceConfiguration_GetConfigurations(iotHubDeviceConfigurationHandle, 20, temp_list);
-			if (result == IOTHUB_DEVICE_CONFIGURATION_OK)
-			{
-
-			}
-			else if (result == IOTHUB_DEVICE_CONFIGURATION_CONFIGURATION_NOT_EXIST)
-			{
-
-			}
-			else if (result == IOTHUB_DEVICE_CONFIGURATION_ERROR)
-			{
-
-			}
+			;
+            if ((result = IoTHubDeviceConfiguration_GetConfigurations(iotHubDeviceConfigurationHandle, 20, temp_list)) != IOTHUB_DEVICE_CONFIGURATION_OK)
+            {
+                (void)printf("IoTHubDeviceConfiguration_GetConfigurations failed\r\n");
+            }
 
             singlylinkedlist_foreach(temp_list, printDeviceInfo, NULL);
 		}
 
-        result = IoTHubDeviceConfiguration_DeleteConfiguration(iotHubDeviceConfigurationHandle, deviceConfigurationAddInfo.configurationId);
-        if (result == IOTHUB_DEVICE_CONFIGURATION_OK)
+        if ((result = IoTHubDeviceConfiguration_DeleteConfiguration(iotHubDeviceConfigurationHandle, deviceConfigurationAddInfo.configurationId)) != IOTHUB_DEVICE_CONFIGURATION_OK)
         {
-
-        }
-        else if (result == IOTHUB_DEVICE_CONFIGURATION_CONFIGURATION_NOT_EXIST)
-        {
-
-        }
-        else if (result == IOTHUB_DEVICE_CONFIGURATION_ERROR)
-        {
-
+            (void)printf("IoTHubDeviceConfiguration_DeleteConfiguration failed\r\n");
         }
     }
     platform_deinit();

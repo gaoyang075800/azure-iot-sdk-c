@@ -342,9 +342,10 @@ static JSON_Value* createConfigurationContentPayload(const IOTHUB_DEVICE_CONFIGU
 		LogError("configuration cannot be null");
 		result = NULL;
 	}
-	else if (((configurationContent->deviceContent == NULL) || (configurationContent->modulesContent == NULL)) && (strlen(configurationContent->deviceContent) > 0 || strlen(configurationContent->modulesContent) > 0))
+	else if (((configurationContent->deviceContent == NULL) || (configurationContent->modulesContent == NULL)) && 
+            ((configurationContent->deviceContent != NULL && strlen(configurationContent->deviceContent) > 0) || (configurationContent->modulesContent != NULL && strlen(configurationContent->modulesContent) > 0)))
 	{
-		LogError("both deviceContent and modulesContent cannot be NULL");
+		LogError("both deviceContent and modulesContent cannot be NULL or empty");
 		result = NULL;
 	}
 	if ((result = json_value_init_object()) == NULL)
@@ -1074,6 +1075,25 @@ static IOTHUB_DEVICE_CONFIGURATION_RESULT clone_deviceConfiguration(IOTHUB_DEVIC
         target->createdTimeUtc = source->createdTimeUtc;
         target->lastUpdatedTimeUtc = source->lastUpdatedTimeUtc;
         target->priority = source->priority;
+        target->content.deviceContent = NULL;
+        target->content.modulesContent = NULL;
+
+        if (source->content.deviceContent != NULL)
+        {
+            if (mallocAndStrcpy_s((char**)&(target->content.deviceContent), source->content.deviceContent) != 0)
+            {
+                LogError("mallocAndStrcpy_s failed for IOTHUB_DEVICE_CONFIGURATION_CONTENT deviceContent");
+                result = IOTHUB_DEVICE_CONFIGURATION_ERROR;
+            }
+        }
+        else if (source->content.modulesContent != NULL)
+        {
+            if (mallocAndStrcpy_s((char**)&(target->content.modulesContent), source->content.modulesContent) != 0)
+            {
+                LogError("mallocAndStrcpy_s failed for IOTHUB_DEVICE_CONFIGURATION_CONTENT modulesContent");
+                result = IOTHUB_DEVICE_CONFIGURATION_ERROR;
+            }
+        }
 
         target->metricResult.numQueries = source->metricResult.numQueries;
         if (target->metricResult.numQueries > 0)
