@@ -303,17 +303,23 @@ static IOTHUB_DEVICE_CONFIGURATION_RESULT sendHttpRequestDeviceConfiguration(IOT
             else
             {
                 STRING_delete(relativePath);
-                if (statusCode == 204)
-                {
-                    /*CodesSRS_IOTHUBDEVICECONFIGURATION_01_030: [ Otherwise IoTHubDeviceConfiguration_GetConfiguration shall save the received deviceConfiguration to the out parameter and return with it ]*/
-                    result = IOTHUB_DEVICE_CONFIGURATION_OK;
-                }
-                else
-                {
-                    /*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_026: [ IoTHubDeviceConfiguration_GetConfiguration shall verify the received HTTP status code and if it is not equal to 200 then return NULL ]*/
-                    LogError("Http Failure status code %d.", statusCode);
-                    result = IOTHUB_DEVICE_CONFIGURATION_ERROR;
-                }
+				if ((((iotHubDeviceConfigurationRequestMode == IOTHUB_DEVICECONFIGURATION_REQUEST_ADD) || 
+					(iotHubDeviceConfigurationRequestMode == IOTHUB_DEVICECONFIGURATION_REQUEST_TESTQUERIES) ||
+					(iotHubDeviceConfigurationRequestMode == IOTHUB_DEVICECONFIGURATION_REQUEST_GET) ||
+					(iotHubDeviceConfigurationRequestMode == IOTHUB_DEVICECONFIGURATION_REQUEST_GET_LIST) ||
+					(iotHubDeviceConfigurationRequestMode == IOTHUB_DEVICECONFIGURATION_REQUEST_UPDATE)) && (statusCode == 200)) ||
+					((iotHubDeviceConfigurationRequestMode == IOTHUB_DEVICECONFIGURATION_REQUEST_DELETE) && (statusCode == 204))
+				   )
+				{
+					/*CodesSRS_IOTHUBDEVICECONFIGURATION_01_030: [ Otherwise IoTHubDeviceConfiguration_GetConfiguration shall save the received deviceConfiguration to the out parameter and return with it ]*/
+					result = IOTHUB_DEVICE_CONFIGURATION_OK;
+				}
+				else
+				{
+					/*Codes_SRS_IOTHUBDEVICECONFIGURATION_01_026: [ IoTHubDeviceConfiguration_GetConfiguration shall verify the received HTTP status code and if it is not equal to 200 then return NULL ]*/
+					LogError("Http Failure status code %d.", statusCode);
+					result = IOTHUB_DEVICE_CONFIGURATION_ERROR;
+				}
             }
         }
         HTTPAPIEX_Destroy(httpExApiHandle);
