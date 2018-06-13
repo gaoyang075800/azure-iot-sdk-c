@@ -17,6 +17,62 @@ static const char* updatedTargetCondition = "tags.Environment='test'";
 static const char* deviceContent = "{\"properties.desired.settings1\": {\"c\": 3, \"d\" : 4}, \"properties.desired.settings2\" : \"xyz\"}";
 static const char* modulesContent = "{\"sunny\": {\"properties.desired\": {\"temperature\": 69,\"humidity\": 30}},\"goolily\": {\"properties.desired\": {\"elevation\": 45,\"orientation\": \"NE\"}},\"$edgeAgent\": {\"properties.desired\": {\"schemaVersion\": \"1.0\",\"runtime\": {\"type\": \"docker\",\"settings\": {\"minDockerVersion\": \"1.5\",\"loggingOptions\": \"\"}},\"systemModules\": {\"edgeAgent\": {\"type\": \"docker\",\"settings\": {\"image\": \"edgeAgent\",\"createOptions\": \"\"},\"configuration\": {\"id\": \"configurationapplyedgeagentreportinge2etestcit-config-a9ed4811-1b57-48bf-8af2-02319a38de01\"}},\"edgeHub\": {\"type\": \"docker\",\"status\": \"running\",\"restartPolicy\": \"always\",\"settings\": {\"image\": \"edgeHub\",\"createOptions\": \"\"},\"configuration\": {\"id\": \"configurationapplyedgeagentreportinge2etestcit-config-a9ed4811-1b57-48bf-8af2-02319a38de01\"}}},\"modules\": {\"sunny\": {\"version\": \"1.0\",\"type\": \"docker\",\"status\": \"running\",\"restartPolicy\": \"on-failure\",\"settings\": {\"image\": \"mongo\",\"createOptions\": \"\"},\"configuration\": {\"id\": \"configurationapplyedgeagentreportinge2etestcit-config-a9ed4811-1b57-48bf-8af2-02319a38de01\"}},\"goolily\": {\"version\": \"1.0\",\"type\": \"docker\",\"status\": \"running\",\"restartPolicy\": \"on-failure\",\"settings\": {\"image\": \"asa\",\"createOptions\": \"\"},\"configuration\": {\"id\": \"configurationapplyedgeagentreportinge2etestcit-config-a9ed4811-1b57-48bf-8af2-02319a38de01\"}}}}},\"$edgeHub\": {\"properties.desired\": {\"schemaVersion\": \"1.0\",\"routes\": {\"route1\": \"from * INTO $upstream\"},\"storeAndForwardConfiguration\": {\"timeToLiveSecs\": 20}}}}";
 
+static const char* modulesContent = "";
+
+static void printNameValuePairs_char(size_t count, const char** names, const char** values)
+{
+    size_t i;
+
+    for (i = 0; i < count; i++)
+    {
+        (void)printf("\t\t%s %s\n", names[i], values[i]);
+    }
+}
+
+static void printNameValuePairs_double(size_t count, const char** names, double* values)
+{
+    size_t i;
+
+    for (i = 0; i < count; i++)
+    {
+        (void)printf("\t\t%s %f\n", names[i], values[i]);
+    }
+}
+
+static void printDeviceInfo(const void* item, const void* action_context, bool* continue_processing)
+{
+    (void)action_context;
+    IOTHUB_DEVICE_CONFIGURATION* configuration = (IOTHUB_DEVICE_CONFIGURATION *)item;
+    
+    if (configuration != NULL)
+    {
+        (void)printf("Configuration\n");
+    }
+
+    (void)printf("    configurationId        : %s\n", configuration->configurationId);
+    (void)printf("    targetCondition        : %s\n", configuration->targetCondition);
+    (void)printf("    createdTime            : %s\n", configuration->createdTimeUtc);
+    (void)printf("    lastUpdatedTime        : %s\n", configuration->lastUpdatedTimeUtc);
+    (void)printf("    eTag                   : %s\n", configuration->eTag);
+    (void)printf("    priority               : %d\n", configuration->priority);
+
+    (void)printf("    Labels                         :\n");
+    printNameValuePairs_char(configuration->labels.numLabels, configuration->labels.labelName, configuration->labels.labelValue);
+    (void)printf("    Configuration content          :\n");
+    (void)printf("    Configuration system metrics   :\n");
+    (void)printf("    \tDefinitions  :\n");
+    printNameValuePairs_char(configuration->systemMetricsDefinition.numQueries, configuration->systemMetricsDefinition.queryNames, (char **)configuration->systemMetricsDefinition.queryStrings);
+    (void)printf("    \tResults  :\n");
+    printNameValuePairs_double(configuration->systemMetricsResult.numQueries, configuration->systemMetricsResult.queryNames, (double *)configuration->systemMetricsResult.results);
+    (void)printf("    Configuration custom metrics   :\n");
+    (void)printf("    \tDefinitions  :\n");
+    printNameValuePairs_char(configuration->metricsDefinition.numQueries, configuration->metricsDefinition.queryNames, (char **)configuration->metricsDefinition.queryStrings);
+    (void)printf("    \tResults  :\n");
+    printNameValuePairs_double(configuration->metricResult.numQueries, configuration->metricResult.queryNames, (double *)configuration->metricResult.results);
+
+    *continue_processing = true;
+}
+
 int main(void)
 {
     (void)platform_init();
@@ -72,9 +128,22 @@ int main(void)
 
         }
 
-        //TODO: enable after implementing Add
-        //IoTHubDeviceConfiguration_FreeConfigurationMembers(&deviceConfigurationInfo);
         Map_Destroy(labels);
+
+        // Get configuration
+        result = IoTHubDeviceConfiguration_GetConfiguration(iotHubDeviceConfigurationHandle, deviceConfigurationAddInfo.configurationId, &deviceConfigurationInfo);
+        if (result == IOTHUB_DEVICE_CONFIGURATION_OK)
+        {
+
+        }
+        else if (result == IOTHUB_DEVICE_CONFIGURATION_CONFIGURATION_NOT_EXIST)
+        {
+
+        }
+        else if (result == IOTHUB_DEVICE_CONFIGURATION_ERROR)
+        {
+
+        }
 
         // Update configuration
         deviceConfigurationInfo.configurationId = configurationId;
@@ -94,28 +163,7 @@ int main(void)
         {
 
         }
-
-        //TODO: Implement after enabling
         //IoTHubDeviceConfiguration_FreeConfigurationMembers(&deviceConfigurationInfo);
-
-        // Get configuration
-
-
-        result = IoTHubDeviceConfiguration_GetConfiguration(iotHubDeviceConfigurationHandle, deviceConfigurationAddInfo.configurationId, &deviceConfigurationInfo);
-        if (result == IOTHUB_DEVICE_CONFIGURATION_OK)
-        {
-
-        }
-        else if (result == IOTHUB_DEVICE_CONFIGURATION_CONFIGURATION_NOT_EXIST)
-        {
-
-        }
-        else if (result == IOTHUB_DEVICE_CONFIGURATION_ERROR)
-        {
-
-        }
-
-        IoTHubDeviceConfiguration_FreeConfigurationMembers(&deviceConfigurationInfo);
 
 		SINGLYLINKEDLIST_HANDLE temp_list;
 
@@ -125,7 +173,7 @@ int main(void)
 		}
 		else
 		{
-			result = IoTHubDeviceConfiguration_GetConfigurations(iotHubDeviceConfigurationHandle, 1000, temp_list);
+			result = IoTHubDeviceConfiguration_GetConfigurations(iotHubDeviceConfigurationHandle, 20, temp_list);
 			if (result == IOTHUB_DEVICE_CONFIGURATION_OK)
 			{
 
@@ -138,6 +186,8 @@ int main(void)
 			{
 
 			}
+
+            singlylinkedlist_foreach(temp_list, printDeviceInfo, NULL);
 		}
 
         result = IoTHubDeviceConfiguration_DeleteConfiguration(iotHubDeviceConfigurationHandle, deviceConfigurationAddInfo.configurationId);
