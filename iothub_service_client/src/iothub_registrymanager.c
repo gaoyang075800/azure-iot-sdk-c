@@ -2055,7 +2055,6 @@ IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_GetModuleOrDeviceList(IOTHUB
         }
     }
     return result;
-
 }
 
 /* DEPRECATED: IoTHubRegistryManager_GetDeviceList is deprecated and may be removed from a future release. */

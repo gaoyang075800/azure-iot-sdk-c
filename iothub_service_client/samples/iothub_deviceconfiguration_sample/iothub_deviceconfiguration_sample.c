@@ -10,8 +10,8 @@
 
 #include "iothub_deviceconfiguration.h"
 
-static const char* connectionString = "[Connection String]";
-static const char* configurationId = "[Configuration Id]";
+static const char* connectionString = "[Hub connection string]";
+static const char* configurationId = "[New configuration id]";
 static const char* targetCondition = "tags.UniqueTag='configurationapplyedgeagentreportinge2etestcita5b4e2b7f6464fe9988feea7d887584a' and tags.Environment='test'";
 static const char* updatedTargetCondition = "tags.Environment='test'";
 static const char* deviceContent = "{\"properties.desired.settings1\": {\"c\": 3, \"d\" : 4}, \"properties.desired.settings2\" : \"xyz\"}";
@@ -116,6 +116,29 @@ int main(void)
         }
 
         IoTHubDeviceConfiguration_FreeConfigurationMembers(&deviceConfigurationInfo);
+
+		SINGLYLINKEDLIST_HANDLE temp_list;
+
+		if ((temp_list = singlylinkedlist_create()) == NULL)
+		{
+			//skip this work
+		}
+		else
+		{
+			result = IoTHubDeviceConfiguration_GetConfigurations(iotHubDeviceConfigurationHandle, 1000, temp_list);
+			if (result == IOTHUB_DEVICE_CONFIGURATION_OK)
+			{
+
+			}
+			else if (result == IOTHUB_DEVICE_CONFIGURATION_CONFIGURATION_NOT_EXIST)
+			{
+
+			}
+			else if (result == IOTHUB_DEVICE_CONFIGURATION_ERROR)
+			{
+
+			}
+		}
 
         result = IoTHubDeviceConfiguration_DeleteConfiguration(iotHubDeviceConfigurationHandle, deviceConfigurationAddInfo.configurationId);
         if (result == IOTHUB_DEVICE_CONFIGURATION_OK)
