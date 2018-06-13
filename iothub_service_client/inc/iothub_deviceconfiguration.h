@@ -66,14 +66,13 @@ typedef struct IOTHUB_DEVICE_CONFIGURATION_TAG
     const char* configurationId;                                                  //version 1+
     const char* targetCondition;                                                  //version 1+
     const char* eTag;                                                             //version 1+
+    const char* contentType;                                                      //version 1+
+    const char* createdTimeUtc;
+    const char* lastUpdatedTimeUtc;
     int priority;                                                                 //version 1+
 
     IOTHUB_DEVICE_CONFIGURATION_CONTENT content;                                  //version 1+
     IOTHUB_DEVICE_CONFIGURATION_LABELS labels;                                    //version 1+
-
-    const char* contentType;                                                      //version 1+
-    const char* createdTimeUtc;
-    const char* lastUpdatedTimeUtc;
 
     IOTHUB_DEVICE_CONFIGURATION_METRICS_RESULT systemMetricsResult;               //version 1+
     IOTHUB_DEVICE_CONFIGURATION_METRICS_DEFINITION systemMetricsDefinition;       //version 1+
