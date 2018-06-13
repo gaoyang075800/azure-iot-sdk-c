@@ -65,13 +65,13 @@ static void printDeviceInfo(const void* item, const void* action_context, bool* 
 
     (void)printf("    Configuration system metrics        :\n");
     (void)printf("    \tDefinitions        :\n");
-    printNameValuePairs_char(configuration->systemMetricsDefinition.numQueries, configuration->systemMetricsDefinition.queryNames, (char **)configuration->systemMetricsDefinition.queryStrings);
+    printNameValuePairs_char(configuration->systemMetricsDefinition.numQueries, configuration->systemMetricsDefinition.queryNames, (const char **)configuration->systemMetricsDefinition.queryStrings);
     (void)printf("    \tResults        :\n");
     printNameValuePairs_double(configuration->systemMetricsResult.numQueries, configuration->systemMetricsResult.queryNames, (double *)configuration->systemMetricsResult.results);
 
     (void)printf("    Configuration custom metrics        :\n");
     (void)printf("    \tDefinitions        :\n");
-    printNameValuePairs_char(configuration->metricsDefinition.numQueries, configuration->metricsDefinition.queryNames, (char **)configuration->metricsDefinition.queryStrings);
+    printNameValuePairs_char(configuration->metricsDefinition.numQueries, configuration->metricsDefinition.queryNames, (const char **)configuration->metricsDefinition.queryStrings);
     (void)printf("    \tResults        :\n");
     printNameValuePairs_double(configuration->metricResult.numQueries, configuration->metricResult.queryNames, (double *)configuration->metricResult.results);
 
@@ -108,7 +108,7 @@ int main(void)
         deviceConfigurationAddInfoContent.modulesContent = modulesContent;
         
         Map_Add(labels, "label1", "value1");               
-        Map_GetInternals(labels, &deviceConfigurationAddInfoLabels.labelName, &deviceConfigurationAddInfoLabels.labelValue, &deviceConfigurationAddInfoLabels.numLabels);
+        Map_GetInternals(labels, (const char* const **)&deviceConfigurationAddInfoLabels.labelName, (const char* const **)&deviceConfigurationAddInfoLabels.labelValue, &deviceConfigurationAddInfoLabels.numLabels);
         
         deviceConfigurationAddInfo.configurationId = configurationId;
         deviceConfigurationAddInfo.targetCondition = targetCondition;
