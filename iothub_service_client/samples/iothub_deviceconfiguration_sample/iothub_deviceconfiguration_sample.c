@@ -14,10 +14,19 @@ static const char* connectionString = "[Hub connection string]";
 static const char* configurationId = "[New configuration id]";
 static const char* targetCondition = "tags.UniqueTag='configurationapplyedgeagentreportinge2etestcita5b4e2b7f6464fe9988feea7d887584a' and tags.Environment='test'";
 static const char* updatedTargetCondition = "tags.Environment='test'";
-//static const char* deviceContent = "{\"properties.desired.settings1\": {\"c\": 3, \"d\" : 4}, \"properties.desired.settings2\" : \"xyz\"}";
-static const char* modulesContent = "{\"sunny\": {\"properties.desired\": {\"temperature\": 69,\"humidity\": 30}},\"goolily\": {\"properties.desired\": {\"elevation\": 45,\"orientation\": \"NE\"}},\"$edgeAgent\": {\"properties.desired\": {\"schemaVersion\": \"1.0\",\"runtime\": {\"type\": \"docker\",\"settings\": {\"minDockerVersion\": \"1.5\",\"loggingOptions\": \"\"}},\"systemModules\": {\"edgeAgent\": {\"type\": \"docker\",\"settings\": {\"image\": \"edgeAgent\",\"createOptions\": \"\"},\"configuration\": {\"id\": \"configurationapplyedgeagentreportinge2etestcit-config-a9ed4811-1b57-48bf-8af2-02319a38de01\"}},\"edgeHub\": {\"type\": \"docker\",\"status\": \"running\",\"restartPolicy\": \"always\",\"settings\": {\"image\": \"edgeHub\",\"createOptions\": \"\"},\"configuration\": {\"id\": \"configurationapplyedgeagentreportinge2etestcit-config-a9ed4811-1b57-48bf-8af2-02319a38de01\"}}},\"modules\": {\"sunny\": {\"version\": \"1.0\",\"type\": \"docker\",\"status\": \"running\",\"restartPolicy\": \"on-failure\",\"settings\": {\"image\": \"mongo\",\"createOptions\": \"\"},\"configuration\": {\"id\": \"configurationapplyedgeagentreportinge2etestcit-config-a9ed4811-1b57-48bf-8af2-02319a38de01\"}},\"goolily\": {\"version\": \"1.0\",\"type\": \"docker\",\"status\": \"running\",\"restartPolicy\": \"on-failure\",\"settings\": {\"image\": \"asa\",\"createOptions\": \"\"},\"configuration\": {\"id\": \"configurationapplyedgeagentreportinge2etestcit-config-a9ed4811-1b57-48bf-8af2-02319a38de01\"}}}}},\"$edgeHub\": {\"properties.desired\": {\"schemaVersion\": \"1.0\",\"routes\": {\"route1\": \"from * INTO $upstream\"},\"storeAndForwardConfiguration\": {\"timeToLiveSecs\": 20}}}}";
+
+static const char* modulesContent = "{\"sunny\": {\"properties.desired\": {\"temperature\": 69,\"humidity\": 30}}, \
+                                      \"goolily\": {\"properties.desired\": {\"elevation\": 45,\"orientation\": \"NE\"}}, \
+                                      \"$edgeAgent\": {\"properties.desired\": {\"schemaVersion\": \"1.0\",\"runtime\": {\"type\": \"docker\",\"settings\": {\"minDockerVersion\": \"1.5\",\"loggingOptions\": \"\"}},\"systemModules\": \
+                                                {\"edgeAgent\": {\"type\": \"docker\",\"settings\": {\"image\": \"edgeAgent\",\"createOptions\": \"\"},\"configuration\": {\"id\": \"configurationapplyedgeagentreportinge2etestcit-config-a9ed4811-1b57-48bf-8af2-02319a38de01\"}}, \
+                                                \"edgeHub\": {\"type\": \"docker\",\"status\": \"running\",\"restartPolicy\": \"always\",\"settings\": {\"image\": \"edgeHub\",\"createOptions\": \"\"},\"configuration\": {\"id\": \"configurationapplyedgeagentreportinge2etestcit-config-a9ed4811-1b57-48bf-8af2-02319a38de01\"}}}, \
+                                                    \"modules\": {\"sunny\": {\"version\": \"1.0\",\"type\": \"docker\",\"status\": \"running\",\"restartPolicy\": \"on-failure\",\"settings\": {\"image\": \"mongo\",\"createOptions\": \"\"},\"configuration\": {\"id\": \"configurationapplyedgeagentreportinge2etestcit-config-a9ed4811-1b57-48bf-8af2-02319a38de01\"}}, \
+                                                    \"goolily\": {\"version\": \"1.0\",\"type\": \"docker\",\"status\": \"running\",\"restartPolicy\": \"on-failure\",\"settings\": {\"image\": \"asa\",\"createOptions\": \"\"},\"configuration\": {\"id\": \"configurationapplyedgeagentreportinge2etestcit-config-a9ed4811-1b57-48bf-8af2-02319a38de01\"}}}}}, \
+                                      \"$edgeHub\": {\"properties.desired\": {\"schemaVersion\": \"1.0\",\"routes\": {\"route1\": \"from * INTO $upstream\"},\"storeAndForwardConfiguration\": {\"timeToLiveSecs\": 20}}}}";
+
+// Configurations can only have a non-blank device or modules content. 
+// Sample devicecontent is "{\"properties.desired.settings1\": {\"c\": 3, \"d\" : 4}, \"properties.desired.settings2\" : \"xyz\"}";
 static const char* deviceContent = "";
-//static const char* modulesContent = "";
 
 static void printNameValuePairs_char(size_t count, const char** names, const char** values)
 {
@@ -47,33 +56,33 @@ static void printDeviceInfo(const void* item, const void* action_context, bool* 
     if (configuration != NULL)
     {
         (void)printf("Configuration\n");
+
+        (void)printf("    configurationId        : %s\n", configuration->configurationId);
+        (void)printf("    targetCondition        : %s\n", configuration->targetCondition);
+        (void)printf("    createdTime            : %s\n", configuration->createdTimeUtc);
+        (void)printf("    lastUpdatedTime        : %s\n", configuration->lastUpdatedTimeUtc);
+        (void)printf("    eTag                   : %s\n", configuration->eTag);
+        (void)printf("    priority               : %d\n", configuration->priority);
+
+        (void)printf("    Labels        :\n");
+        printNameValuePairs_char(configuration->labels.numLabels, configuration->labels.labelName, configuration->labels.labelValue);
+
+        (void)printf("    Configuration content        :\n");
+        if (configuration->content.deviceContent != NULL) (void)printf("    \tDevice content        : %s\n", configuration->content.deviceContent);
+        if (configuration->content.modulesContent != NULL) (void)printf("    \tModules content        :%s\n", configuration->content.modulesContent);
+
+        (void)printf("    Configuration system metrics        :\n");
+        (void)printf("    \tDefinitions        :\n");
+        printNameValuePairs_char(configuration->systemMetricsDefinition.numQueries, configuration->systemMetricsDefinition.queryNames, (const char **)configuration->systemMetricsDefinition.queryStrings);
+        (void)printf("    \tResults        :\n");
+        printNameValuePairs_double(configuration->systemMetricsResult.numQueries, configuration->systemMetricsResult.queryNames, (double *)configuration->systemMetricsResult.results);
+
+        (void)printf("    Configuration custom metrics        :\n");
+        (void)printf("    \tDefinitions        :\n");
+        printNameValuePairs_char(configuration->metricsDefinition.numQueries, configuration->metricsDefinition.queryNames, (const char **)configuration->metricsDefinition.queryStrings);
+        (void)printf("    \tResults        :\n");
+        printNameValuePairs_double(configuration->metricResult.numQueries, configuration->metricResult.queryNames, (double *)configuration->metricResult.results);
     }
-
-    (void)printf("    configurationId        : %s\n", configuration->configurationId);
-    (void)printf("    targetCondition        : %s\n", configuration->targetCondition);
-    (void)printf("    createdTime            : %s\n", configuration->createdTimeUtc);
-    (void)printf("    lastUpdatedTime        : %s\n", configuration->lastUpdatedTimeUtc);
-    (void)printf("    eTag                   : %s\n", configuration->eTag);
-    (void)printf("    priority               : %d\n", configuration->priority);
-
-    (void)printf("    Labels        :\n");
-    printNameValuePairs_char(configuration->labels.numLabels, configuration->labels.labelName, configuration->labels.labelValue);
-
-    (void)printf("    Configuration content        :\n");
-    if (configuration->content.deviceContent != NULL) (void)printf("    \tDevice content        : %s\n", configuration->content.deviceContent);
-    if (configuration->content.modulesContent != NULL) (void)printf("    \tModules content        :%s\n", configuration->content.modulesContent);
-
-    (void)printf("    Configuration system metrics        :\n");
-    (void)printf("    \tDefinitions        :\n");
-    printNameValuePairs_char(configuration->systemMetricsDefinition.numQueries, configuration->systemMetricsDefinition.queryNames, (const char **)configuration->systemMetricsDefinition.queryStrings);
-    (void)printf("    \tResults        :\n");
-    printNameValuePairs_double(configuration->systemMetricsResult.numQueries, configuration->systemMetricsResult.queryNames, (double *)configuration->systemMetricsResult.results);
-
-    (void)printf("    Configuration custom metrics        :\n");
-    (void)printf("    \tDefinitions        :\n");
-    printNameValuePairs_char(configuration->metricsDefinition.numQueries, configuration->metricsDefinition.queryNames, (const char **)configuration->metricsDefinition.queryStrings);
-    (void)printf("    \tResults        :\n");
-    printNameValuePairs_double(configuration->metricResult.numQueries, configuration->metricResult.queryNames, (double *)configuration->metricResult.results);
 
     *continue_processing = true;
 }
@@ -121,7 +130,7 @@ int main(void)
 
         if ((result = IoTHubDeviceConfiguration_AddConfiguration(iotHubDeviceConfigurationHandle, &deviceConfigurationAddInfo, &deviceConfigurationInfo)) != IOTHUB_DEVICE_CONFIGURATION_OK)
         {
-            (void)printf("IoTHubDeviceConfiguration_AddConfiguration failed\r\n");
+            (void)printf("IoTHubDeviceConfiguration_AddConfiguration failed. Result = %d\r\n", result);
         }
 
         Map_Destroy(labels);
@@ -129,7 +138,7 @@ int main(void)
         // Get configuration
         if ((result = IoTHubDeviceConfiguration_GetConfiguration(iotHubDeviceConfigurationHandle, deviceConfigurationAddInfo.configurationId, &deviceConfigurationInfo)) != IOTHUB_DEVICE_CONFIGURATION_OK)
         {
-            (void)printf("IoTHubDeviceConfiguration_GetConfiguration failed\r\n");
+            (void)printf("IoTHubDeviceConfiguration_GetConfiguration failed. Result = %d\r\n", result);
         }
 
         // Update configuration
@@ -139,7 +148,7 @@ int main(void)
 
         if ((result = IoTHubDeviceConfiguration_UpdateConfiguration(iotHubDeviceConfigurationHandle, &deviceConfigurationInfo)) != IOTHUB_DEVICE_CONFIGURATION_OK)
         {
-            (void)printf("IoTHubDeviceConfiguration_UpdateConfiguration failed\r\n");
+            (void)printf("IoTHubDeviceConfiguration_UpdateConfiguration failed. Result = %d\r\n", result);
         }
         
         SINGLYLINKEDLIST_HANDLE temp_list;
@@ -150,10 +159,9 @@ int main(void)
 		}
 		else
 		{
-			;
             if ((result = IoTHubDeviceConfiguration_GetConfigurations(iotHubDeviceConfigurationHandle, 20, temp_list)) != IOTHUB_DEVICE_CONFIGURATION_OK)
             {
-                (void)printf("IoTHubDeviceConfiguration_GetConfigurations failed\r\n");
+                (void)printf("IoTHubDeviceConfiguration_GetConfigurations failed. Result = %d\r\n", result);
             }
 
             singlylinkedlist_foreach(temp_list, printDeviceInfo, NULL);
@@ -161,7 +169,7 @@ int main(void)
 
         if ((result = IoTHubDeviceConfiguration_DeleteConfiguration(iotHubDeviceConfigurationHandle, deviceConfigurationAddInfo.configurationId)) != IOTHUB_DEVICE_CONFIGURATION_OK)
         {
-            (void)printf("IoTHubDeviceConfiguration_DeleteConfiguration failed\r\n");
+            (void)printf("IoTHubDeviceConfiguration_DeleteConfiguration failed. Result = %d\r\n", result);
         }
     }
     platform_deinit();

@@ -67,8 +67,8 @@ typedef struct IOTHUB_DEVICE_CONFIGURATION_TAG
     const char* targetCondition;                                                  //version 1+
     const char* eTag;                                                             //version 1+
     const char* contentType;                                                      //version 1+
-    const char* createdTimeUtc;
-    const char* lastUpdatedTimeUtc;
+    const char* createdTimeUtc;                                                   //version 1+
+    const char* lastUpdatedTimeUtc;                                               //version 1+
     int priority;                                                                 //version 1+
 
     IOTHUB_DEVICE_CONFIGURATION_CONTENT content;                                  //version 1+
