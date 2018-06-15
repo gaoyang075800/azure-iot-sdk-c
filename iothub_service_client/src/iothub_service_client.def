@@ -24,6 +24,7 @@ EXPORTS
     IoTHubDeviceConfiguration_Create
     IoTHubDeviceConfiguration_Destroy
     IoTHubDeviceConfiguration_GetConfiguration
+    IoTHubDeviceConfiguration_GetConfigurations
     IoTHubDeviceConfiguration_AddConfiguration
     IoTHubDeviceConfiguration_UpdateConfiguration
     IoTHubDeviceConfiguration_DeleteConfiguration
