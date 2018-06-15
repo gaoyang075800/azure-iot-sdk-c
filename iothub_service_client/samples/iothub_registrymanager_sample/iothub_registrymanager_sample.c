@@ -15,7 +15,7 @@
 static const char* connectionString = "[device connection string]";
 static const char* deviceId = "";
 
-static void printDeviceInfo(const IOTHUB_DEVICE* device, int orderNum)
+static void printDeviceInfo(const IOTHUB_DEVICE_EX* device, int orderNum)
 {
     if ((device != NULL) && (device->deviceId != NULL))
     {
@@ -58,7 +58,7 @@ static void printDeviceInfo(const IOTHUB_DEVICE* device, int orderNum)
     }
 }
 
-static void free_device_resource(IOTHUB_DEVICE* device)
+static void free_device_resource(IOTHUB_DEVICE_EX* device)
 {
     free((char*)device->deviceId);
     free((char*)device->primaryKey);
@@ -88,21 +88,23 @@ int main(void)
     }
     else
     {
-        IOTHUB_REGISTRY_DEVICE_CREATE deviceCreateInfo;
+        IOTHUB_REGISTRY_DEVICE_CREATE_EX deviceCreateInfo;
         (void)printf("Creating device with RegistryManager...\n");
         IOTHUB_REGISTRYMANAGER_HANDLE iotHubRegistryManagerHandle = IoTHubRegistryManager_Create(iotHubServiceClientHandle);
 
-        (void)memset(&deviceCreateInfo, 0, sizeof(IOTHUB_REGISTRY_DEVICE_CREATE));
+        (void)memset(&deviceCreateInfo, 0, sizeof(IOTHUB_REGISTRY_DEVICE_CREATE_EX));
         deviceCreateInfo.deviceId = deviceId;
         deviceCreateInfo.primaryKey = "";
         deviceCreateInfo.secondaryKey = "";
         deviceCreateInfo.authMethod = IOTHUB_REGISTRYMANAGER_AUTH_SPK;
+        deviceCreateInfo.version = IOTHUB_REGISTRY_DEVICE_CREATE_EX_VERSION_1;
 
         //TODO: Switch this to IOTHUB_DEVICE_EX
-        IOTHUB_DEVICE deviceInfo;
+        IOTHUB_DEVICE_EX deviceInfo;
+        deviceInfo.version = IOTHUB_REGISTRY_DEVICE_CREATE_EX_VERSION_1;
 
         // Create device
-        result = IoTHubRegistryManager_CreateDevice(iotHubRegistryManagerHandle, &deviceCreateInfo, &deviceInfo);
+        result = IoTHubRegistryManager_CreateDevice_Ex(iotHubRegistryManagerHandle, &deviceCreateInfo, &deviceInfo);
         if (result == IOTHUB_REGISTRYMANAGER_OK)
         {
             (void)printf("IoTHubRegistryManager_CreateDevice: Device has been created successfully: deviceId=%s\n", deviceInfo.deviceId);
@@ -138,9 +140,10 @@ int main(void)
         }
 
         // Get device
-        (void)memset(&deviceInfo, 0, sizeof(IOTHUB_DEVICE));
+        (void)memset(&deviceInfo, 0, sizeof(IOTHUB_DEVICE_EX));
+        deviceInfo.version = IOTHUB_REGISTRY_DEVICE_CREATE_EX_VERSION_1;
 
-        result = IoTHubRegistryManager_GetDevice(iotHubRegistryManagerHandle, deviceCreateInfo.deviceId, &deviceInfo);
+        result = IoTHubRegistryManager_GetDevice_Ex(iotHubRegistryManagerHandle, deviceCreateInfo.deviceId, &deviceInfo);
         if (result == IOTHUB_REGISTRYMANAGER_OK)
         {
             (void)printf("IoTHubRegistryManager_GetDevice: Successfully got device info: deviceId=%s\n", deviceInfo.deviceId);
